@@ -28,8 +28,6 @@ public:
     bool isCurrCharDataModelEmpty();
     CapSense *getCurrCharDataModelAddress();
     int getNumSensors();
-    void subscribeToCurrCharNotifications(bool notifications, bool indications);
-    void unsubscribeToCurrCharNotifications();
     void buildCurrCharDataModel();
     int getNumRowsCurrCharDataModel();
     quint16 getCurrCharValue(int row, int sensor);
@@ -38,9 +36,20 @@ public:
     void clearCurrCharDataModel();
 
     //CapSense
+    void subscribeToSensorsNotifications(bool notifications, bool indications);
+    void unsubscribeToSensorsNotifications();
+    void startAcquisition();
+    void stopAcquisition();
+    void startSendingData();
+    void stopSendingData();
     void startTimer();
     double getElapsedTime();
     QTime *getTimerAddress();
+
+    //Status
+    void subscribeToStatusNotifications(bool notifications, bool indications);
+    void unsubscribeToStatusNotifications();
+    void readStatusFlags();
 
 
 private:
@@ -50,9 +59,11 @@ private:
 
 signals:
     void newValuesReceivedFromModel_signal(sensors newValues);
+    void statusUpdateFromModel_signal(Status flags);
 
 
 private slots:
     void newValuesReceivedFromModel_slot(sensors newValues);
+    void statusUpdateFromModel_slot(Status flags);
 
 };

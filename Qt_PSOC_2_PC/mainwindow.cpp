@@ -1,14 +1,20 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "mv_controller.h"
+#include "gattprofilewindow.h"
+#include "settingswindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    /* MODEL */
     controller = new MV_Controller(this);
 
+
+    /* UI FORM */
     ui->setupUi(this);
+
 
     /* MainWindow */
     this->setWindowTitle("CapSense data acquisition");
@@ -26,18 +32,18 @@ MainWindow::MainWindow(QWidget *parent) :
         controller->setCurrChar( (Characteristic *)ui->characteristicSelection->currentData().value<void *>() );
 
 
-    /* PUSH BUTTON: Start */
-    if (controller->isCurrCharEmpty())
-        ui->start->setEnabled(FALSE);
+    /* PUSH BUTTON: Start acquisition */
+    ui->startAcquisition->setEnabled(false);
 
+    /* PUSH BUTTON: Stop acquisition */
+    ui->stopAcquisition->setEnabled(false);
 
-    /* PUSH BUTTON: Stop */
-    ui->stop->setEnabled(FALSE);
-
+    /* PUSH BUTTON: Download data */
+    ui->downloadData->setEnabled(false);
 
     /* PUSH BUTTON: Clear */
-    if (controller->isCurrCharDataModelEmpty())
-        ui->clear->setEnabled(FALSE);
+    if (ui->characteristicSelection->count() > 0)
+        ui->clear->setEnabled(true);
 
 
     /* LCD NUMBER: Elapsed time (acquisition) */
@@ -49,6 +55,14 @@ MainWindow::MainWindow(QWidget *parent) :
     lcdTimer->setText("00:00.000");
 
     ui->statusBar->addWidget(lcdTimer);
+
+
+    /* LABELS: Status */
+    ui->Ind_Ready_Acq->setVisible(false);
+    ui->Ind_Acq->setVisible(false);
+    ui->Ind_Ready_Send->setVisible(false);
+    ui->Ind_Send->setVisible(false);
+    controller->readStatusFlags();
 
 
     /* PROGRESS BARS: Sensors' last values */
@@ -138,42 +152,73 @@ MainWindow::MainWindow(QWidget *parent) :
                                       plotXAxis_maxRange - X_Axis->axis(QCPAxis::atBottom)->range().size() / 2);
     ui->plot_horizontalDrag->setValue(X_Axis->axis(QCPAxis::atBottom)->range().lower + X_Axis->axis(QCPAxis::atBottom)->range().size() / 2);
     connect(ui->plot_horizontalDrag, SIGNAL(sliderMoved(int)), this, SLOT(onHorizontalDragChanged(int)));
+
+
+    /* OTHER WINDOWS */
+    gattProfileWindow = new GattProfileWindow(this);
+    settingsWindow = new SettingsWindow(this);
+
+
+    // Subscribe to notifications
+    controller->subscribeToSensorsNotifications(true, false);
+    controller->subscribeToStatusNotifications(false, true);
 }
 
 
 MainWindow::~MainWindow()
 {
+    controller->unsubscribeToSensorsNotifications();
+    controller->unsubscribeToStatusNotifications();
+
     delete controller;
+    delete ui;
+    delete gattProfileWindow;
+    delete settingsWindow;
 }
 
 
-void MainWindow::on_start_clicked()
+MV_Controller *MainWindow::getModel()
 {
+    return controller;
+}
+
+
+void MainWindow::on_startAcquisition_clicked()
+{
+    // Clear the CapSense model.
+    on_clear_clicked();
+
     /* Start acquisition */
-    controller->subscribeToCurrCharNotifications(TRUE, FALSE);
+    controller->startAcquisition();
 
     /* Start timers */
     controller->startTimer();
     timer->start();
-
-    /* Draw the controls */
-    ui->start->setEnabled(FALSE);
-    ui->stop->setEnabled(TRUE);
-    ui->characteristicSelection->setEnabled(FALSE);
-    ui->clear->setEnabled(FALSE);
 }
 
 
-void MainWindow::on_stop_clicked()
+void MainWindow::on_stopAcquisition_clicked()
 {
     /* Stop acquisition */
-    controller->unsubscribeToCurrCharNotifications();
+    controller->stopAcquisition();
 
     /* Get the time elapsed */
     timer->stop();
-    setLCD(TRUE);
+    setLCD(true);
     plotXAxis_maxRange = (double) controller->getElapsedTime()/1000;
 
+}
+
+
+void MainWindow::on_downloadData_clicked()
+{
+    // Start sending data
+    controller->startSendingData();
+}
+
+
+void MainWindow::downloadDataDone()
+{
     /* Draw the table view */
     controller->generateKeys(plotXAxis_maxRange);
     controller->buildCurrCharDataModel();
@@ -190,15 +235,11 @@ void MainWindow::on_stop_clicked()
             ui->plot_sensors->graph(sensor)->addData(controller->getCurrCharKey(row), controller->getCurrCharValue(row, sensor));
 
         ui->plot_sensors->graph(sensor)->rescaleValueAxis();
+        ui->plot_sensors->axisRect(sensor)->axis(QCPAxis::atLeft)->setRangeUpper(0xFFFF);
     }
     ui->plot_sensors->replot();
 
     /* Draw the controls */
-    ui->stop->setEnabled(FALSE);
-    ui->start->setEnabled(FALSE);
-    ui->characteristicSelection->setEnabled(TRUE);
-    ui->clear->setEnabled(TRUE);
-
     ui->plot_horizontalDrag->setRange(plotXAxis_minRange + ui->plot_sensors->axisRect()->axis(QCPAxis::atBottom)->range().size() / 2,
                                       plotXAxis_maxRange - ui->plot_sensors->axisRect()->axis(QCPAxis::atBottom)->range().size() / 2);
     ui->plot_horizontalDrag->setValue(ui->plot_sensors->axisRect()->axis(QCPAxis::atBottom)->range().lower +
@@ -209,12 +250,17 @@ void MainWindow::on_stop_clicked()
 
 void MainWindow::on_clear_clicked()
 {
-    /* Erase the table view */
-    controller->clearCurrCharDataModel();
+    // If the model isn't alreay empty.
+    if ( !controller->isCurrCharDataModelEmpty() ) {
+        /* Erase the table view */
+        controller->clearCurrCharDataModel();
 
-    /* Erase the plots */
-    for (int i = 0; i < controller->getNumSensors(); i++)
-        ui->plot_sensors->graph(i)->clearData();
+        /* Erase the plots */
+        for (int i = 0; i < controller->getNumSensors(); i++)
+            ui->plot_sensors->graph(i)->clearData();
+    }
+
+    // Redraw the plots
     ui->plot_sensors->replot();
 
     /* Reset LCD */
@@ -226,12 +272,6 @@ void MainWindow::on_clear_clicked()
     ui->sensor2->setValue(0);
     ui->sensor3->setValue(0);
     ui->sensor4->setValue(0);
-
-    /* Draw the controls */
-    if ( controller->isCurrCharDataModelEmpty() ) {
-        ui->clear->setEnabled(FALSE);
-        ui->start->setEnabled(TRUE);
-    }
 }
 
 
@@ -250,6 +290,93 @@ void MainWindow::newValuesReceived_updateView(sensors newValues)
     ui->sensor2->setValue(newValues.sensor[2]);
     ui->sensor3->setValue(newValues.sensor[3]);
     ui->sensor4->setValue(newValues.sensor[4]);
+}
+
+
+void MainWindow::statusUpdate_updateView(Status flags)
+{
+    QFont boldFont;
+    boldFont.setBold(true);
+
+    QFont notBoldFont;
+    notBoldFont.setBold(false);
+
+    // Ready
+    if (flags.Ready) {
+        // Status widget
+        ui->Ind_Ready_Acq->setVisible(true);
+        ui->Lab_Ready_Acq->setFont(boldFont);
+
+        // Buttons
+        ui->startAcquisition->setEnabled(true);
+    }
+    else {
+        // Status widget
+        ui->Ind_Ready_Acq->setVisible(false);
+        ui->Lab_Ready_Acq->setFont(notBoldFont);
+
+        // Buttons
+        ui->startAcquisition->setEnabled(false);
+    }
+
+    // Acquiring
+    if (flags.Acquiring) {
+        // Status widget
+        ui->Ind_Acq->setVisible(true);
+        ui->Lab_Acq->setFont(boldFont);
+
+        // Buttons
+        ui->stopAcquisition->setEnabled(true);
+    }
+    else {
+        // Status widget
+        ui->Ind_Acq->setVisible(false);
+        ui->Lab_Acq->setFont(notBoldFont);
+
+        // Buttons
+        ui->stopAcquisition->setEnabled(false);
+    }
+
+    // No more space
+    if (flags.NoMoreSpace) {
+        on_stopAcquisition_clicked();
+    }
+
+    // Data acquired
+    if (flags.DataAcquired) {
+        // Status widget
+        ui->Ind_Ready_Send->setVisible(true);
+        ui->Lab_Ready_Send->setFont(boldFont);
+
+        // Buttons
+        ui->downloadData->setEnabled(true);
+    }
+    else {
+        // Status widget
+        ui->Ind_Ready_Send->setVisible(false);
+        ui->Lab_Ready_Send->setFont(notBoldFont);
+
+        // Buttons
+        ui->downloadData->setEnabled(false);
+    }
+
+    // Sending
+    if (flags.Sending) {
+        // Status widget
+        ui->Ind_Send->setVisible(true);
+        ui->Lab_Send->setFont(boldFont);
+    }
+    else {
+        // Status widget
+        ui->Ind_Send->setVisible(false);
+        ui->Lab_Send->setFont(notBoldFont);
+    }
+
+    // No more data
+    if (flags.NoMoreData) {
+        controller->stopSendingData();
+        downloadDataDone();
+    }
 }
 
 
@@ -322,4 +449,14 @@ void MainWindow::setLCD(bool withMillisec)
     timeValue.setHMS(0, minutes, seconds, millisec);
 
     lcdTimer->setText(timeValue.toString(QString("mm:ss.zzz")));
+}
+
+void MainWindow::on_actionSettings_triggered()
+{
+    settingsWindow->show();
+}
+
+void MainWindow::on_actionGATT_Profile_triggered()
+{
+    gattProfileWindow->show();
 }

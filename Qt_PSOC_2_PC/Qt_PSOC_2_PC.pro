@@ -22,7 +22,9 @@ SOURCES += main.cpp\
     Bluetooth/Descriptor.cpp \
     Bluetooth/Device.cpp \
     Bluetooth/modelble.cpp \
-    Bluetooth/Service.cpp
+    Bluetooth/Service.cpp \
+    settingswindow.cpp \
+    gattprofilewindow.cpp
 
 HEADERS  += mainwindow.h \
     mv_controller.h \
@@ -33,6 +35,11 @@ HEADERS  += mainwindow.h \
     Bluetooth/Descriptor.h \
     Bluetooth/Device.h \
     Bluetooth/modelble.h \
-    Bluetooth/Service.h
+    Bluetooth/Service.h \
+    main.h \
+    settingswindow.h \
+    gattprofilewindow.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    settingswindow.ui \
+    gattprofilewindow.ui

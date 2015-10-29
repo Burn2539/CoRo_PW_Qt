@@ -63,7 +63,7 @@ HRESULT Device::retrieveListServices()
 		BLUETOOTH_GATT_FLAG_NONE);
 
 	if (HRESULT_FROM_WIN32(ERROR_MORE_DATA) != hr) {
-        qCritical() << "ERROR while getting the size of the services buffer: ";
+        qCritical() << "\tERROR while getting the size of the services buffer: ";
 		ErrorDescription(hr);
 		return hr;
 	}
@@ -75,7 +75,7 @@ HRESULT Device::retrieveListServices()
 			malloc(sizeof(BTH_LE_GATT_SERVICE) * serviceBufferSize);
 
 		if (NULL == servicesBuffer) {
-            qCritical() << "ERROR while allocating space for the services buffer." << endl;
+            qCritical() << "\tERROR while allocating space for the services buffer." << endl;
 		}
 		else {
 			RtlZeroMemory(servicesBuffer, sizeof(BTH_LE_GATT_SERVICE) * serviceBufferSize);
@@ -90,7 +90,7 @@ HRESULT Device::retrieveListServices()
 			BLUETOOTH_GATT_FLAG_NONE);
 
 		if (FAILED(hr)) {
-            qCritical() << "ERROR while getting the list of services: ";
+            qCritical() << "\tERROR while getting the list of services: ";
 			ErrorDescription(hr);
 			return hr;
 		}
@@ -161,7 +161,7 @@ HANDLE Device::getHandle(GUID AGuid)
 				GENERIC_WRITE | GENERIC_READ,
 				FILE_SHARE_READ | FILE_SHARE_WRITE,
 				NULL,
-				CREATE_ALWAYS,
+                OPEN_EXISTING,
 				0,
 				NULL);
 

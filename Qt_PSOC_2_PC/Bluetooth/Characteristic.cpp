@@ -23,8 +23,6 @@ Characteristic::Characteristic(Service *_service, PBTH_LE_GATT_CHARACTERISTIC _c
 	this->IsWritable = _characteristic->IsWritable;
 	this->IsWritableWithoutResponse = _characteristic->IsWritableWithoutResponse;
 	this->ServiceHandle = _characteristic->ServiceHandle;
-
-    this->Capsense = new CapSense;
 }
 
 
@@ -39,7 +37,7 @@ Characteristic::~Characteristic()
 		this->unsubscribeToNotification();
 	for (int i = 0; i < this->numDescriptors; i++)
 		delete this->descriptors[i];
-    delete Capsense;
+
     qDebug() << "Characteristic has been deleted." << endl;
 }
 
@@ -82,8 +80,8 @@ HRESULT Characteristic::retrieveListDescriptors()
 		BLUETOOTH_GATT_FLAG_NONE);
 
 	if (HRESULT_FROM_WIN32(ERROR_MORE_DATA) != hr) {
-        qCritical() << "\tERROR while getting the size of the descriptors buffer: ";
-		ErrorDescription(hr);
+        qWarning() << "\tNo descriptor found for this characteristic.";
+        this->numDescriptors = 0;
 		return hr;
 	}
 
@@ -209,7 +207,7 @@ HRESULT Characteristic::subscribeToNotification(__in bool _SubscritbeToNotificat
 		return hr;
 	}
 
-	this->notificationEnabled = TRUE;
+    this->notificationEnabled = TRUE;
 
 	return hr;
 }
@@ -265,8 +263,8 @@ HRESULT Characteristic::unsubscribeToNotification(void)
 	/* Initialize the new value to write to the CCCD. */
 	RtlZeroMemory(&newValue, sizeof(newValue));
 	newValue.DescriptorType = ClientCharacteristicConfiguration;
-	newValue.ClientCharacteristicConfiguration.IsSubscribeToNotification = FALSE;
-	newValue.ClientCharacteristicConfiguration.IsSubscribeToIndication = FALSE;
+    newValue.ClientCharacteristicConfiguration.IsSubscribeToNotification = FALSE;
+    newValue.ClientCharacteristicConfiguration.IsSubscribeToIndication = FALSE;
 
 	/* Write the new value to the CCCD. That disables the notification for the current characteristic. */
     hr = BluetoothGATTSetDescriptorValue(
@@ -281,7 +279,7 @@ HRESULT Characteristic::unsubscribeToNotification(void)
 		return hr;
 	}
 
-	this->notificationEnabled = FALSE;
+    this->notificationEnabled = FALSE;
 
 	return hr;
 }
@@ -404,7 +402,7 @@ HRESULT Characteristic::getName()
         if (this->descriptors[i]->DescriptorType == CharacteristicUserDescription) {
             PBTH_LE_GATT_DESCRIPTOR_VALUE nameValue;
             hr = this->descriptors[i]->readValue(&nameValue);
-            for (int j = 0; j < nameValue->DataSize; j++) {
+            for (USHORT j = 0; j < nameValue->DataSize; j++) {
                 if (j%2 == 0)
                     this->name += nameValue->Data[j];
             }

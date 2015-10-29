@@ -68,9 +68,9 @@ HRESULT Service::retrieveListCharacteristics()
 		BLUETOOTH_GATT_FLAG_NONE);
 
 	if (HRESULT_FROM_WIN32(ERROR_MORE_DATA) != hr) {
-        qCritical() << "ERROR while getting the size of the characteristics buffer: ";
-		ErrorDescription(hr);
-		return hr;
+        qWarning() << "\tNo characteristic found for this service.";
+        this->numCharacteristics = 0;
+        return hr;
 	}
 
 	/* Allocate space for the buffer. */
@@ -80,7 +80,7 @@ HRESULT Service::retrieveListCharacteristics()
 			malloc(characteristicBufferSize * sizeof(BTH_LE_GATT_CHARACTERISTIC));
 
 		if (NULL == characteristicsBuffer) {
-            qCritical() << "ERROR while allocating space for the characteristics buffer." << endl;
+            qCritical() << "\tERROR while allocating space for the characteristics buffer." << endl;
 		}
 		else {
 			RtlZeroMemory(characteristicsBuffer,
@@ -97,13 +97,13 @@ HRESULT Service::retrieveListCharacteristics()
 			BLUETOOTH_GATT_FLAG_NONE);
 
 		if (FAILED(hr)) {
-            qCritical() << "ERROR while getting the list of characteristics: ";
+            qCritical() << "\tERROR while getting the list of characteristics: ";
 			ErrorDescription(hr);
 			return hr;
 		}
 
 		if (this->numCharacteristics != characteristicBufferSize)
-            qWarning() << "WARNING - Mismatch between the size of the buffer and the number of characteristics." << endl;
+            qWarning() << "\tWARNING - Mismatch between the size of the buffer and the number of characteristics." << endl;
 
 		/* Create the characteristics. */
 		for (int i = 0; i < this->numCharacteristics; i++)

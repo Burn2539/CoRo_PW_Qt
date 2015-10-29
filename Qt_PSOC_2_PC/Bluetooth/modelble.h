@@ -22,7 +22,22 @@
 #include "Bluetooth/Service.h"
 #include "Bluetooth/Device.h"
 
+
 #define BYTE 8
+
+// UUIDs
+#define UUID_DEVICE     "{0000E750-0000-1000-8000-00805F9B34FB}"
+#define UUID_SENSORS    0xE751
+#define UUID_CONTROL    0xE752
+#define UUID_STATUS     0xE753
+
+// Byte masks for the status characteristic.
+#define STATUS_READY_BYTE_MASK          0x00
+#define STATUS_ACQUIRING_BYTE_MASK      0x01
+#define STATUS_NO_MORE_SPACE_BYTE_MASK  0x02
+#define STATUS_DATA_ACQUIRED_BYTE_MASK  0x03
+#define STATUS_SENDING_BYTE_MASK        0x04
+#define STATUS_NO_MORE_DATA_BYTE_MASK   0x05
 
 
 class ModelBLE : public QStandardItemModel
@@ -36,14 +51,25 @@ public:
     Device *PSOC;
     GUID PSOCguid;
 
-    static void newSensorDataReceived(__in BTH_LE_GATT_EVENT_TYPE EventType, __in PVOID EventOutParameter, __in PVOID Context);
+    Characteristic *Char_Sensors = nullptr;
+    Characteristic *Char_Control = nullptr;
+    Characteristic *Char_Status = nullptr;
+
+    CapSense *Capsense;
+
+    static void newDataReceived(__in BTH_LE_GATT_EVENT_TYPE EventType, __in PVOID EventOutParameter, __in PVOID Context);
+    static void newStatusReceived(__in BTH_LE_GATT_EVENT_TYPE EventType, __in PVOID EventOutParameter, __in PVOID Context);
+
+    Status StatusFlags;
 
 signals:
     void newCapSenseValuesReceived(sensors newValues);
+    void statusUpdate(Status flags);
 
 private:
     ModelBLE();
     static ModelBLE *instance;
 };
+
 
 void ErrorDescription(HRESULT hr);

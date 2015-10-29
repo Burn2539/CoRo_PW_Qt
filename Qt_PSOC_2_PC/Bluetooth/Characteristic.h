@@ -26,7 +26,7 @@ public:
 	/* Subscribe to the notification or indication of the characteristic. */
 	HRESULT subscribeToNotification(__in bool _SubscritbeToNotification, __in bool _SubscribeToIndication, __in PFNBLUETOOTH_GATT_EVENT_CALLBACK _callbackFunction);
 	HRESULT unsubscribeToNotification(void);
-	bool notificationEnabled;
+    bool notificationEnabled = false;
 	BLUETOOTH_GATT_EVENT_HANDLE EventHandle;
 
 	/* Read or write the characteristic's value. */
@@ -36,7 +36,4 @@ public:
     /* Characteristic's name. */
     QString name;
     HRESULT getName();
-
-    /* CapSense data. */
-    CapSense *Capsense;
 };

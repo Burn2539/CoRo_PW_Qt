@@ -7,8 +7,13 @@ MV_Controller::MV_Controller(MainWindow *parent)
     this->model = ModelBLE::getInstance();
     crcInit();
 
+    // Transfer the 'newCapSenseValues' signal to the view
     connect(this->model, SIGNAL(newCapSenseValuesReceived(sensors)), this, SLOT(newValuesReceivedFromModel_slot(sensors)));
     connect(this, SIGNAL(newValuesReceivedFromModel_signal(sensors)), parent, SLOT(newValuesReceived_updateView(sensors)));
+
+    // Transfer the 'statusUpdate' signal to the view
+    connect(this->model, SIGNAL(statusUpdate(Status)), this, SLOT(statusUpdateFromModel_slot(Status)));
+    connect(this, SIGNAL(statusUpdateFromModel_signal(Status)), parent, SLOT(statusUpdate_updateView(Status)));
 }
 
 
@@ -62,13 +67,13 @@ bool MV_Controller::isCurrCharEmpty()
 
 bool MV_Controller::isCurrCharDataModelEmpty()
 {
-    return CurrChar->Capsense->values.isEmpty();
+    return model->Capsense->values.isEmpty();
 }
 
 
 CapSense *MV_Controller::getCurrCharDataModelAddress()
 {
-    return CurrChar->Capsense;
+    return model->Capsense;
 }
 
 
@@ -78,41 +83,53 @@ int MV_Controller::getNumSensors()
 }
 
 
-void MV_Controller::subscribeToCurrCharNotifications(bool notifications, bool indications)
+void MV_Controller::subscribeToSensorsNotifications(bool notifications, bool indications)
 {
-    CurrChar->subscribeToNotification(notifications, indications, ModelBLE::newSensorDataReceived);
+    model->Char_Sensors->subscribeToNotification(notifications, indications, ModelBLE::newDataReceived);
 }
 
 
-void MV_Controller::unsubscribeToCurrCharNotifications()
+void MV_Controller::unsubscribeToSensorsNotifications()
 {
-    CurrChar->unsubscribeToNotification();
+    model->Char_Sensors->unsubscribeToNotification();
+}
+
+
+void MV_Controller::subscribeToStatusNotifications(bool notifications, bool indications)
+{
+    model->Char_Status->subscribeToNotification(notifications, indications, ModelBLE::newStatusReceived);
+}
+
+
+void MV_Controller::unsubscribeToStatusNotifications()
+{
+    model->Char_Status->unsubscribeToNotification();
 }
 
 
 void MV_Controller::buildCurrCharDataModel()
 {
-    CurrChar->Capsense->insertRows(0, CurrChar->Capsense->values.size());
+    model->Capsense->insertRows(0, model->Capsense->values.size());
 }
 
 
 int MV_Controller::getNumRowsCurrCharDataModel()
 {
-    return CurrChar->Capsense->rowCount();
+    return model->Capsense->rowCount();
 }
 
 
 quint16 MV_Controller::getCurrCharValue(int row, int sensor)
 {
-    return CurrChar->Capsense->values[row].sensor[sensor];
+    return model->Capsense->values[row].sensor[sensor];
 }
 
 
 void MV_Controller::clearCurrCharDataModel()
 {
-    CurrChar->Capsense->removeRows(0, getNumRowsCurrCharDataModel());
-    CurrChar->Capsense->values.clear();
-    CurrChar->Capsense->keys.clear();
+    model->Capsense->removeRows(0, getNumRowsCurrCharDataModel());
+    model->Capsense->values.clear();
+    model->Capsense->keys.clear();
 }
 
 
@@ -122,32 +139,112 @@ void MV_Controller::newValuesReceivedFromModel_slot(sensors newValues)
 }
 
 
+void MV_Controller::statusUpdateFromModel_slot(Status flags)
+{
+    emit(this->statusUpdateFromModel_signal(flags));
+}
+
+
 void MV_Controller::startTimer()
 {
-    CurrChar->Capsense->timer->start();
+    model->Capsense->timer->start();
 }
 
 
 double MV_Controller::getElapsedTime()
 {
-    return CurrChar->Capsense->timer->elapsed();
+    return model->Capsense->timer->elapsed();
 }
 
 
 void MV_Controller::generateKeys(double totalTime)
 {
-    for (double i = 0; i < CurrChar->Capsense->rowCount(); i++)
-        CurrChar->Capsense->keys.push_back( i * (totalTime / CurrChar->Capsense->rowCount()) );
+    for (double i = 0; i < model->Capsense->rowCount(); i++)
+        model->Capsense->keys.push_back( i * (totalTime / model->Capsense->rowCount()) );
 }
 
 
 double MV_Controller::getCurrCharKey(int index)
 {
-    return CurrChar->Capsense->keys[index];
+    return model->Capsense->keys[index];
 }
 
 
 QTime *MV_Controller::getTimerAddress()
 {
-    return CurrChar->Capsense->timer;
+    return model->Capsense->timer;
+}
+
+
+void MV_Controller::startAcquisition()
+{
+    PBTH_LE_GATT_CHARACTERISTIC_VALUE value = new BTH_LE_GATT_CHARACTERISTIC_VALUE;
+    quint8 acquireData = true;
+    quint8 sendData = false;
+
+    value->Data[0] = acquireData;
+    value->Data[1] = sendData;
+    value->DataSize = 2;
+
+    model->Char_Control->writeValue(value);
+}
+
+
+void MV_Controller::stopAcquisition()
+{
+    PBTH_LE_GATT_CHARACTERISTIC_VALUE value = new BTH_LE_GATT_CHARACTERISTIC_VALUE;
+    quint8 acquireData = false;
+    quint8 sendData = false;
+
+    value->Data[0] = acquireData;
+    value->Data[1] = sendData;
+    value->DataSize = 2;
+
+    model->Char_Control->writeValue(value);
+}
+
+
+void MV_Controller::startSendingData()
+{
+    PBTH_LE_GATT_CHARACTERISTIC_VALUE value = new BTH_LE_GATT_CHARACTERISTIC_VALUE;
+    quint8 acquireData = false;
+    quint8 sendData = true;
+
+    value->Data[0] = acquireData;
+    value->Data[1] = sendData;
+    value->DataSize = 2;
+
+    model->Char_Control->writeValue(value);
+}
+
+
+void MV_Controller::stopSendingData()
+{
+    PBTH_LE_GATT_CHARACTERISTIC_VALUE value = new BTH_LE_GATT_CHARACTERISTIC_VALUE;
+    quint8 acquireData = false;
+    quint8 sendData = false;
+
+    value->Data[0] = acquireData;
+    value->Data[1] = sendData;
+    value->DataSize = 2;
+
+    model->Char_Control->writeValue(value);
+}
+
+
+void MV_Controller::readStatusFlags()
+{
+    PBTH_LE_GATT_CHARACTERISTIC_VALUE value;
+    Status flags;
+
+    model->Char_Status->readValue(&value);
+
+    flags.Ready = value->Data[STATUS_READY_BYTE_MASK];
+    flags.Acquiring = value->Data[STATUS_ACQUIRING_BYTE_MASK];
+    flags.NoMoreSpace = value->Data[STATUS_NO_MORE_SPACE_BYTE_MASK];
+    flags.DataAcquired = value->Data[STATUS_DATA_ACQUIRED_BYTE_MASK];
+    flags.Sending = value->Data[STATUS_SENDING_BYTE_MASK];
+    flags.NoMoreData = value->Data[STATUS_NO_MORE_DATA_BYTE_MASK];
+
+    emit(statusUpdateFromModel_signal(flags));
 }
