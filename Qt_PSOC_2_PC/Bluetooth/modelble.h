@@ -46,16 +46,17 @@ class ModelBLE : public QStandardItemModel
 
 public:
     static ModelBLE *getInstance();
+    static void deleteInstance();
     ~ModelBLE();
 
-    Device *PSOC;
+    Device *PSOC = nullptr;
     GUID PSOCguid;
 
     Characteristic *Char_Sensors = nullptr;
     Characteristic *Char_Control = nullptr;
     Characteristic *Char_Status = nullptr;
 
-    CapSense *Capsense;
+    CapSense *Capsense = nullptr;
 
     static void newDataReceived(__in BTH_LE_GATT_EVENT_TYPE EventType, __in PVOID EventOutParameter, __in PVOID Context);
     static void newStatusReceived(__in BTH_LE_GATT_EVENT_TYPE EventType, __in PVOID EventOutParameter, __in PVOID Context);

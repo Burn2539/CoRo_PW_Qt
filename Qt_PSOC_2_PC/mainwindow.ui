@@ -92,6 +92,13 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
+          <widget class="QCheckBox" name="sendDataSynchronously">
+           <property name="text">
+            <string>Receive data synchronously</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QWidget" name="StatusWidget" native="true">
            <property name="minimumSize">
             <size>
@@ -155,6 +162,13 @@
               </property>
              </widget>
             </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="Lab_Ready_Acq">
+              <property name="text">
+               <string>Ready to acquire data</string>
+              </property>
+             </widget>
+            </item>
             <item row="1" column="0">
              <widget class="QLabel" name="Ind_Acq">
               <property name="minimumSize">
@@ -180,6 +194,13 @@
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="Lab_Acq">
+              <property name="text">
+               <string>Acquiring data</string>
               </property>
              </widget>
             </item>
@@ -211,6 +232,13 @@
               </property>
              </widget>
             </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="Lab_Ready_Send">
+              <property name="text">
+               <string>Ready to send data</string>
+              </property>
+             </widget>
+            </item>
             <item row="3" column="0">
              <widget class="QLabel" name="Ind_Send">
               <property name="minimumSize">
@@ -236,27 +264,6 @@
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLabel" name="Lab_Ready_Acq">
-              <property name="text">
-               <string>Ready to acquire data</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLabel" name="Lab_Acq">
-              <property name="text">
-               <string>Acquiring data</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QLabel" name="Lab_Ready_Send">
-              <property name="text">
-               <string>Ready to send data</string>
               </property>
              </widget>
             </item>

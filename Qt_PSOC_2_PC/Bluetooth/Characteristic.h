@@ -12,7 +12,7 @@ public:
 	~Characteristic();
 
 	/* Address of the service to which the characteristic is from. */
-	Service *parentService;
+    Service *parentService = nullptr;
 
 	/* List of all the descriptors' addresses. */
 	std::vector<Descriptor*> descriptors;
@@ -34,6 +34,6 @@ public:
 	HRESULT writeValue(PBTH_LE_GATT_CHARACTERISTIC_VALUE _value);
 
     /* Characteristic's name. */
-    QString name;
+    QString name = "";
     HRESULT getName();
 };

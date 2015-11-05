@@ -4,7 +4,9 @@
 
 MV_Controller::MV_Controller(MainWindow *parent)
 {
+    ModelBLE::deleteInstance();
     this->model = ModelBLE::getInstance();
+
     crcInit();
 
     // Transfer the 'newCapSenseValues' signal to the view
@@ -159,7 +161,7 @@ double MV_Controller::getElapsedTime()
 
 void MV_Controller::generateKeys(double totalTime)
 {
-    for (double i = 0; i < model->Capsense->rowCount(); i++)
+    for (double i = 1; i <= model->Capsense->rowCount(); i++)
         model->Capsense->keys.push_back( i * (totalTime / model->Capsense->rowCount()) );
 }
 
@@ -176,7 +178,7 @@ QTime *MV_Controller::getTimerAddress()
 }
 
 
-void MV_Controller::startAcquisition()
+void MV_Controller::startAcquisition(bool sendDataSynchronously)
 {
     PBTH_LE_GATT_CHARACTERISTIC_VALUE value = new BTH_LE_GATT_CHARACTERISTIC_VALUE;
     quint8 acquireData = true;
@@ -184,13 +186,14 @@ void MV_Controller::startAcquisition()
 
     value->Data[0] = acquireData;
     value->Data[1] = sendData;
-    value->DataSize = 2;
+    value->Data[2] = sendDataSynchronously;
+    value->DataSize = 3;
 
     model->Char_Control->writeValue(value);
 }
 
 
-void MV_Controller::stopAcquisition()
+void MV_Controller::stopAcquisition(bool sendDataSynchronously)
 {
     PBTH_LE_GATT_CHARACTERISTIC_VALUE value = new BTH_LE_GATT_CHARACTERISTIC_VALUE;
     quint8 acquireData = false;
@@ -198,7 +201,8 @@ void MV_Controller::stopAcquisition()
 
     value->Data[0] = acquireData;
     value->Data[1] = sendData;
-    value->DataSize = 2;
+    value->Data[2] = sendDataSynchronously;
+    value->DataSize = 3;
 
     model->Char_Control->writeValue(value);
 }
@@ -209,10 +213,12 @@ void MV_Controller::startSendingData()
     PBTH_LE_GATT_CHARACTERISTIC_VALUE value = new BTH_LE_GATT_CHARACTERISTIC_VALUE;
     quint8 acquireData = false;
     quint8 sendData = true;
+    quint8 sendDataSynchronously = false;
 
     value->Data[0] = acquireData;
     value->Data[1] = sendData;
-    value->DataSize = 2;
+    value->Data[2] = sendDataSynchronously;
+    value->DataSize = 3;
 
     model->Char_Control->writeValue(value);
 }
@@ -223,10 +229,12 @@ void MV_Controller::stopSendingData()
     PBTH_LE_GATT_CHARACTERISTIC_VALUE value = new BTH_LE_GATT_CHARACTERISTIC_VALUE;
     quint8 acquireData = false;
     quint8 sendData = false;
+    quint8 sendDataSynchronously = false;
 
     value->Data[0] = acquireData;
     value->Data[1] = sendData;
-    value->DataSize = 2;
+    value->Data[2] = sendDataSynchronously;
+    value->DataSize = 3;
 
     model->Char_Control->writeValue(value);
 }
@@ -247,4 +255,16 @@ void MV_Controller::readStatusFlags()
     flags.NoMoreData = value->Data[STATUS_NO_MORE_DATA_BYTE_MASK];
 
     emit(statusUpdateFromModel_signal(flags));
+}
+
+
+bool MV_Controller::isStillAcquiring()
+{
+    return model->StatusFlags.Acquiring;
+}
+
+
+bool MV_Controller::isReady()
+{
+    return model->StatusFlags.Ready;
 }

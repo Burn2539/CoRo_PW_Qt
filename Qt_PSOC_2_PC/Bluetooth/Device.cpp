@@ -23,7 +23,7 @@ Device::~Device()
 {
 	for (int i = 0; i < this->numServices; i++)
 		delete this->services[i];
-	CloseHandle(this->Handle);
+    //CloseHandle(this->Handle);
     qDebug() << "Device has been deleted." << endl;
 }
 

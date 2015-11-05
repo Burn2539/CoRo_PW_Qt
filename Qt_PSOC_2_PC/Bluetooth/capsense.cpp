@@ -9,6 +9,7 @@ CapSense::CapSense()
 {
     timer = new QTime;
     values.reserve(5000);
+    keys.reserve(5000);
 }
 
 
@@ -20,6 +21,7 @@ CapSense::CapSense()
 CapSense::~CapSense()
 {
     values.clear();
+    keys.clear();
 }
 
 
@@ -42,9 +44,9 @@ int CapSense::rowCount(const QModelIndex & /*parent*/) const
 int CapSense::columnCount(const QModelIndex & /*parent*/) const
 {
     /***************************************************
-     * Sensor1 * Sensor2 * Sensor3 * Sensor4 * Sensor5 *
+     * Sensor1 * Sensor2 * Sensor3 * Sensor4 *   ...   *
      ***************************************************/
-    return 5;
+    return NUM_SENSORS;
 }
 
 
@@ -72,19 +74,11 @@ QVariant CapSense::headerData(int section, Qt::Orientation orientation, int role
 {
     if (role == Qt::DisplayRole)
     {
-        if (orientation == Qt::Horizontal) {
-            switch (section)
-            {
-            case 0: return QString("Sensor 1");
-            case 1: return QString("Sensor 2");
-            case 2: return QString("Sensor 3");
-            case 3: return QString("Sensor 4");
-            case 4: return QString("Sensor 5");
-            }
-        }
-        else if (orientation == Qt::Vertical) {
-            return QString::number(keys[section], 'f', 4);
-        }
+        if (orientation == Qt::Horizontal)
+            return QString("Sensor %1").arg(section + 1);
+        else if (orientation == Qt::Vertical)
+            //return QString::number(keys[section], 'f', 3);
+            return QString("%1").arg(section + 1);
     }
     return QVariant();
 }
@@ -117,6 +111,9 @@ bool CapSense::removeRows(int position, int rows, const QModelIndex &index)
 
     beginRemoveRows(QModelIndex(), position, position + rows - 1);
     endRemoveRows();
+
+    beginResetModel();
+    endResetModel();
 
     return TRUE;
 }

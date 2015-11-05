@@ -38,8 +38,8 @@ public:
     //CapSense
     void subscribeToSensorsNotifications(bool notifications, bool indications);
     void unsubscribeToSensorsNotifications();
-    void startAcquisition();
-    void stopAcquisition();
+    void startAcquisition(bool sendDataSynchronously);
+    void stopAcquisition(bool sendDataSynchronously);
     void startSendingData();
     void stopSendingData();
     void startTimer();
@@ -50,6 +50,8 @@ public:
     void subscribeToStatusNotifications(bool notifications, bool indications);
     void unsubscribeToStatusNotifications();
     void readStatusFlags();
+    bool isStillAcquiring();
+    bool isReady();
 
 
 private:

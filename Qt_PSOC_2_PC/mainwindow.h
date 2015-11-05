@@ -32,6 +32,7 @@ private slots:
     void on_characteristicSelection_currentIndexChanged();
     void on_actionGATT_Profile_triggered();
     void on_actionSettings_triggered();
+    void on_sendDataSynchronously_clicked();
     void onXRangeChanged(const QCPRange newRange, const QCPRange oldRange);
     void onHorizontalDragChanged(const int newCenter);
     void setLCD(bool withMillisec = FALSE);

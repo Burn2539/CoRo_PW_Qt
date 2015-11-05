@@ -13,7 +13,7 @@ public:
 	GUID Guid;
 
 	/* Handle to the BLE device to wich you are connected. */
-	HANDLE Handle;
+    HANDLE Handle;
 	HANDLE getHandle(GUID AGuid);
 
 	/* List of all the services' addresses. */

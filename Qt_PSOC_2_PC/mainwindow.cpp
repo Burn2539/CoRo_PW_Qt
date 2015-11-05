@@ -62,7 +62,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->Ind_Acq->setVisible(false);
     ui->Ind_Ready_Send->setVisible(false);
     ui->Ind_Send->setVisible(false);
-    controller->readStatusFlags();
 
 
     /* PROGRESS BARS: Sensors' last values */
@@ -71,6 +70,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->sensor2->setValue(0);
     ui->sensor3->setValue(0);
     ui->sensor4->setValue(0);
+
+
+    // CHECKBOX: Send data synchronously
+    ui->sendDataSynchronously->setChecked(false);
+    on_sendDataSynchronously_clicked();
 
 
     /* TABLEVIEW: All sensors' values */
@@ -159,9 +163,12 @@ MainWindow::MainWindow(QWidget *parent) :
     settingsWindow = new SettingsWindow(this);
 
 
-    // Subscribe to notifications
+    // Subscribe to notifications.
     controller->subscribeToSensorsNotifications(true, false);
     controller->subscribeToStatusNotifications(false, true);
+
+    // First read of the status flags.
+    controller->readStatusFlags();
 }
 
 
@@ -189,7 +196,7 @@ void MainWindow::on_startAcquisition_clicked()
     on_clear_clicked();
 
     /* Start acquisition */
-    controller->startAcquisition();
+    controller->startAcquisition(ui->sendDataSynchronously->isChecked());
 
     /* Start timers */
     controller->startTimer();
@@ -200,13 +207,21 @@ void MainWindow::on_startAcquisition_clicked()
 void MainWindow::on_stopAcquisition_clicked()
 {
     /* Stop acquisition */
-    controller->stopAcquisition();
+    controller->stopAcquisition(ui->sendDataSynchronously->isChecked());
 
     /* Get the time elapsed */
     timer->stop();
     setLCD(true);
     plotXAxis_maxRange = (double) controller->getElapsedTime()/1000;
 
+    // If we were receiving the data synchronously.
+    if (ui->sendDataSynchronously->isChecked()) {
+        // Wait for the end of data acquisition
+        int delay = 0;
+        while ( delay++ < 1000000 ) {
+        }
+        downloadDataDone();
+    }
 }
 
 
@@ -229,7 +244,7 @@ void MainWindow::downloadDataDone()
             ui->plot_sensors->axisRect(sensor)->axis(QCPAxis::atBottom)->setRange(plotXAxis_minRange, plotXAxis_maxRange);
         else
             ui->plot_sensors->axisRect(sensor)->axis(QCPAxis::atBottom)->setRange(plotXAxis_minRange,
-                                                                             plotXAxis_minRange + ui->plot_sensors->axisRect(sensor)->axis(QCPAxis::atBottom)->range().size());
+                                                                                  plotXAxis_minRange + ui->plot_sensors->axisRect(sensor)->axis(QCPAxis::atBottom)->range().size());
 
         for (int row = 0; row < controller->getNumRowsCurrCharDataModel(); row++)
             ui->plot_sensors->graph(sensor)->addData(controller->getCurrCharKey(row), controller->getCurrCharValue(row, sensor));
@@ -285,11 +300,13 @@ void MainWindow::on_characteristicSelection_currentIndexChanged()
 void MainWindow::newValuesReceived_updateView(sensors newValues)
 {
     /* PROGRESS BARS: Sensor's last values */
-    ui->sensor0->setValue(newValues.sensor[0]);
-    ui->sensor1->setValue(newValues.sensor[1]);
-    ui->sensor2->setValue(newValues.sensor[2]);
-    ui->sensor3->setValue(newValues.sensor[3]);
-    ui->sensor4->setValue(newValues.sensor[4]);
+    if ( ui->sendDataSynchronously->isChecked() ) {
+        ui->sensor0->setValue(newValues.sensor[0]);
+        ui->sensor1->setValue(newValues.sensor[1]);
+        ui->sensor2->setValue(newValues.sensor[2]);
+        ui->sensor3->setValue(newValues.sensor[3]);
+        ui->sensor4->setValue(newValues.sensor[4]);
+    }
 }
 
 
@@ -309,6 +326,7 @@ void MainWindow::statusUpdate_updateView(Status flags)
 
         // Buttons
         ui->startAcquisition->setEnabled(true);
+        ui->sendDataSynchronously->setEnabled(true);
     }
     else {
         // Status widget
@@ -317,6 +335,7 @@ void MainWindow::statusUpdate_updateView(Status flags)
 
         // Buttons
         ui->startAcquisition->setEnabled(false);
+        ui->sendDataSynchronously->setEnabled(false);
     }
 
     // Acquiring
@@ -327,6 +346,11 @@ void MainWindow::statusUpdate_updateView(Status flags)
 
         // Buttons
         ui->stopAcquisition->setEnabled(true);
+
+        // No more space
+        if (flags.NoMoreSpace) {
+            on_stopAcquisition_clicked();
+        }
     }
     else {
         // Status widget
@@ -337,13 +361,8 @@ void MainWindow::statusUpdate_updateView(Status flags)
         ui->stopAcquisition->setEnabled(false);
     }
 
-    // No more space
-    if (flags.NoMoreSpace) {
-        on_stopAcquisition_clicked();
-    }
-
     // Data acquired
-    if (flags.DataAcquired) {
+    if (flags.DataAcquired && !ui->sendDataSynchronously->isChecked()) {
         // Status widget
         ui->Ind_Ready_Send->setVisible(true);
         ui->Lab_Ready_Send->setFont(boldFont);
@@ -365,17 +384,17 @@ void MainWindow::statusUpdate_updateView(Status flags)
         // Status widget
         ui->Ind_Send->setVisible(true);
         ui->Lab_Send->setFont(boldFont);
+
+        // No more data
+        if (flags.NoMoreData) {
+            controller->stopSendingData();
+            downloadDataDone();
+        }
     }
     else {
         // Status widget
         ui->Ind_Send->setVisible(false);
         ui->Lab_Send->setFont(notBoldFont);
-    }
-
-    // No more data
-    if (flags.NoMoreData) {
-        controller->stopSendingData();
-        downloadDataDone();
     }
 }
 
@@ -451,12 +470,31 @@ void MainWindow::setLCD(bool withMillisec)
     lcdTimer->setText(timeValue.toString(QString("mm:ss.zzz")));
 }
 
+
 void MainWindow::on_actionSettings_triggered()
 {
     settingsWindow->show();
 }
 
+
 void MainWindow::on_actionGATT_Profile_triggered()
 {
     gattProfileWindow->show();
+}
+
+
+void MainWindow::on_sendDataSynchronously_clicked()
+{
+    if (ui->sendDataSynchronously->isChecked()) {
+        ui->Ind_Ready_Send->setVisible(false);
+        ui->Lab_Ready_Send->setVisible(false);
+        ui->downloadData->setVisible(false);
+        ui->sensors_lastValues->setEnabled(true);
+    }
+
+    else {
+        ui->Lab_Ready_Send->setVisible(true);
+        ui->downloadData->setVisible(true);
+        ui->sensors_lastValues->setEnabled(false);
+    }
 }

@@ -11,7 +11,7 @@ public:
 	~Service();
 
 	/* Address of the device to which the service is from. */
-	Device *parentDevice;
+    Device *parentDevice = nullptr;
 
 	/* List of all the characteristics' addresses. */
 	std::vector<Characteristic*> characteristics;
