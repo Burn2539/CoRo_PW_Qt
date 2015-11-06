@@ -70,6 +70,9 @@ signals:
 private:
     ModelBLE();
     static ModelBLE *instance;
+
+    // DEBUGGING
+    QTime timer;
 };
 
 

@@ -1,11 +1,5 @@
 #include "modelble.h"
 
-struct BLEsensor {
-    quint32 Data;
-    quint16 Value;
-    quint16 CRC;
-};
-
 ModelBLE *ModelBLE::instance = 0;
 
 /*************************************************************************
@@ -127,38 +121,16 @@ void ModelBLE::newDataReceived(__in BTH_LE_GATT_EVENT_TYPE EventType, __in PVOID
     // Sensors values received.
     if (Characteristic_context->CharacteristicUuid.Value.ShortUuid == UUID_SENSORS)
     {
-        BLEsensor sensor[NUM_SENSORS];
-        sensors valuesToPush;
-        const quint8 sensorDataSize = sizeof(quint32);
-        const quint8 allSensorsDataSize = sensorDataSize * NUM_SENSORS;
-        quint8 numData = ValueChangedEventParameters->CharacteristicValueDataSize / allSensorsDataSize;
+        // DEBUGGING
+        instance->timer.start();
+        // DEBUGGING
 
-        // For each of the data sent...
-        for (int k = 0; k < numData; k++) {
-            /* For each sensors... */
-            for (int i = 0; i < NUM_SENSORS; i++) {
-                /* For each byte... */
-                for (int j = 0; j < sensorDataSize; j++)
-                    /* Copy the byte into the array that holds the whole DWORD sent by the BLE device. */
-                    sensor[i].Data = sensor[i].Data << BYTE | unsigned(ValueChangedEventParameters->CharacteristicValue->Data[(allSensorsDataSize * k) + (sensorDataSize * i) + j]);
+        for (int i = 0; i < ValueChangedEventParameters->CharacteristicValueDataSize; i++)
+            instance->Capsense->rawData.push_back(ValueChangedEventParameters->CharacteristicValue->Data[i]);
 
-                /* Extract the sensor value and its CRC from the DWORD. */
-                sensor[i].Value = sensor[i].Data >> (2 * BYTE) & 0xFFFF;
-                sensor[i].CRC = sensor[i].Data & 0xFFFF;
-
-                /* If the sensor value corresponds to the CRC, keep the value. Otherwise, replace it by NULL. */
-                if (verifyCRC(sensor[i].Value, sensor[i].CRC))
-                    valuesToPush.sensor[i] = sensor[i].Value;
-                else
-                    valuesToPush.sensor[i] = NULL;
-            }
-
-            /* Push all the sensor values received into the vector that holds all the sensor values. */
-            instance->Capsense->values.push_back(valuesToPush);
-
-            /* Signal to update the progress bars displaying the last values. */
-            emit(instance->newCapSenseValuesReceived(valuesToPush));
-        }
+        // DEBUGGING
+        qDebug() << "Time elapsed = " << instance->timer.elapsed() << endl;
+        // DEBUGGING
     }
 }
 

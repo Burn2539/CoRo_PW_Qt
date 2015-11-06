@@ -109,8 +109,48 @@ void MV_Controller::unsubscribeToStatusNotifications()
 }
 
 
+void MV_Controller::validateAndFillValues()
+{
+    BLEsensor sensor[NUM_SENSORS];
+    sensors valuesToPush;
+    const quint8 sensorDataSize = sizeof(quint32);
+    const quint8 allSensorsDataSize = sensorDataSize * NUM_SENSORS;
+    quint8 numSets;
+    numSets = model->Capsense->rawData.size() / allSensorsDataSize;
+
+    // For each of the set of data sent...
+    for (int k = 0; k < numSets; k++) {
+        /* For each sensor... */
+        for (int i = 0; i < NUM_SENSORS; i++) {
+            /* For each byte... */
+            for (int j = 0; j < sensorDataSize; j++)
+                /* Copy the byte into the array that holds the whole DWORD sent by the BLE device. */
+                sensor[i].Data = sensor[i].Data << BYTE | model->Capsense->rawData[(allSensorsDataSize * k) + (sensorDataSize * i) + j];
+
+            /* Extract the sensor value and its CRC from the DWORD. */
+            sensor[i].Value = sensor[i].Data >> (2 * BYTE) & 0xFFFF;
+            sensor[i].CRC = sensor[i].Data & 0xFFFF;
+
+            /* If the sensor value corresponds to the CRC, keep the value. Otherwise, replace it by NULL. */
+            if (verifyCRC(sensor[i].Value, sensor[i].CRC))
+                valuesToPush.sensor[i] = sensor[i].Value;
+            else
+                valuesToPush.sensor[i] = NULL;
+        }
+
+        /* Push all the sensor values received into the vector that holds all the sensor values. */
+        model->Capsense->values.push_back(valuesToPush);
+
+//        /* Signal to update the progress bars displaying the last values. */
+//        emit(instance->newCapSenseValuesReceived(valuesToPush));
+    }
+
+}
+
+
 void MV_Controller::buildCurrCharDataModel()
 {
+
     model->Capsense->insertRows(0, model->Capsense->values.size());
 }
 
@@ -130,6 +170,7 @@ quint16 MV_Controller::getCurrCharValue(int row, int sensor)
 void MV_Controller::clearCurrCharDataModel()
 {
     model->Capsense->removeRows(0, getNumRowsCurrCharDataModel());
+    model->Capsense->rawData.clear();
     model->Capsense->values.clear();
     model->Capsense->keys.clear();
 }

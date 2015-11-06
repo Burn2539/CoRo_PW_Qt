@@ -9,6 +9,7 @@ public:
 
     QTime *timer;
 
+    QVector<quint8> rawData;
     QVector<double> keys;
     QVector<sensors> values;
 

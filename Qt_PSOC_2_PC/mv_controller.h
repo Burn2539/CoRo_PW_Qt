@@ -28,6 +28,7 @@ public:
     bool isCurrCharDataModelEmpty();
     CapSense *getCurrCharDataModelAddress();
     int getNumSensors();
+    void validateAndFillValues();
     void buildCurrCharDataModel();
     int getNumRowsCurrCharDataModel();
     quint16 getCurrCharValue(int row, int sensor);

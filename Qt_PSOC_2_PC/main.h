@@ -17,6 +17,13 @@
 #define NUM_SENSORS 5
 
 
+struct BLEsensor {
+    quint32 Data;
+    quint16 Value;
+    quint16 CRC;
+};
+
+
 struct sensors {
     quint16 sensor[NUM_SENSORS];
 };

@@ -8,6 +8,7 @@
 CapSense::CapSense()
 {
     timer = new QTime;
+    rawData.reserve(10000);
     values.reserve(5000);
     keys.reserve(5000);
 }
@@ -20,6 +21,7 @@ CapSense::CapSense()
 **************************************************************************/
 CapSense::~CapSense()
 {
+    rawData.clear();
     values.clear();
     keys.clear();
 }

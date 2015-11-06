@@ -234,6 +234,9 @@ void MainWindow::on_downloadData_clicked()
 
 void MainWindow::downloadDataDone()
 {
+    // Validate data and fill the "values" vector
+    controller->validateAndFillValues();
+
     /* Draw the table view */
     controller->generateKeys(plotXAxis_maxRange);
     controller->buildCurrCharDataModel();
