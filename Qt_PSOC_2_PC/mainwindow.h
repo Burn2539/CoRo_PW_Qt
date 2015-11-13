@@ -18,6 +18,7 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
     MV_Controller *getModel();
+    bool isSynchronous();
 
 public slots:
     void newValuesReceived_updateView(sensors newValues);
@@ -35,7 +36,9 @@ private slots:
     void on_sendDataSynchronously_clicked();
     void onXRangeChanged(const QCPRange newRange, const QCPRange oldRange);
     void onHorizontalDragChanged(const int newCenter);
-    void setLCD(bool withMillisec = FALSE);
+    void setLCD(bool finalDisplay = false);
+    void on_actionCopy_triggered();
+    void keyPressEvent(QKeyEvent * event);
 
 private:
     Ui::MainWindow *ui;
@@ -44,6 +47,9 @@ private:
     MV_Controller *controller;
     double plotXAxis_minRange = 0;
     double plotXAxis_maxRange = 10;
-    QTimer *timer;
+    QTimer *timerAcquisition;
+    int timeAcquisitionElapsed = 0;
     QLabel *lcdTimer;
+    QTime *timerSending;
+    int timeSendingElapsed = 0;
 };

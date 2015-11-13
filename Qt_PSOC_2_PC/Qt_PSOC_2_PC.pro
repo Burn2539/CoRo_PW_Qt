@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     Bluetooth/modelble.cpp \
     Bluetooth/Service.cpp \
     settingswindow.cpp \
-    gattprofilewindow.cpp
+    gattprofilewindow.cpp \
+    Bluetooth/l2cap.cpp
 
 HEADERS  += mainwindow.h \
     mv_controller.h \
@@ -38,7 +39,8 @@ HEADERS  += mainwindow.h \
     Bluetooth/Service.h \
     main.h \
     settingswindow.h \
-    gattprofilewindow.h
+    gattprofilewindow.h \
+    Bluetooth/l2cap.h
 
 FORMS    += mainwindow.ui \
     settingswindow.ui \

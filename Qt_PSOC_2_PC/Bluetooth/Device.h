@@ -16,6 +16,9 @@ public:
     HANDLE Handle;
 	HANDLE getHandle(GUID AGuid);
 
+    // L2CAP
+
+
 	/* List of all the services' addresses. */
 	std::vector<Service*> services;
 

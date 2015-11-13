@@ -2,7 +2,7 @@
 
 #include "main.h"
 
-/* Librairies needed to use BLE on Windows. */
+// Librairies needed to use BLE on Windows.
 #include <SDKDDKVer.h>
 #include <windows.h>
 #include <setupapi.h>
@@ -10,11 +10,12 @@
 #include <regstr.h>
 #include <bthdef.h>
 #include <Bluetoothleapis.h>
+#include <Bthioctl.h>
 #pragma comment(lib, "SetupAPI")
 #pragma comment(lib, "BluetoothApis.lib")
 #pragma comment(lib, "Ole32.lib")
 
-/* My librairies. */
+// My librairies.
 #include "Bluetooth/crc.h"
 #include "Bluetooth/Descriptor.h"
 #include "Bluetooth/capsense.h"
@@ -39,13 +40,14 @@
 #define STATUS_SENDING_BYTE_MASK        0x04
 #define STATUS_NO_MORE_DATA_BYTE_MASK   0x05
 
+class MV_Controller;
 
 class ModelBLE : public QStandardItemModel
 {
     Q_OBJECT
 
 public:
-    static ModelBLE *getInstance();
+    static ModelBLE *getInstance(MV_Controller *parent);
     static void deleteInstance();
     ~ModelBLE();
 
@@ -68,8 +70,9 @@ signals:
     void statusUpdate(Status flags);
 
 private:
-    ModelBLE();
+    ModelBLE(MV_Controller *parent);
     static ModelBLE *instance;
+    MV_Controller *controller;
 
     // DEBUGGING
     QTime timer;

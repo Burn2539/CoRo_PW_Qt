@@ -1,4 +1,5 @@
 #include "modelble.h"
+#include "mv_controller.h"
 
 ModelBLE *ModelBLE::instance = 0;
 
@@ -7,10 +8,10 @@ ModelBLE *ModelBLE::instance = 0;
 *	SINGLETON
 *
 **************************************************************************/
-ModelBLE *ModelBLE::getInstance()
+ModelBLE *ModelBLE::getInstance(MV_Controller *parent = 0)
 {
     if (!instance)
-        instance = new ModelBLE;
+        instance = new ModelBLE(parent);
     return instance;
 }
 
@@ -32,9 +33,10 @@ void ModelBLE::deleteInstance()
 *	CONSTRUCTOR
 *
 **************************************************************************/
-ModelBLE::ModelBLE()
+ModelBLE::ModelBLE(MV_Controller *parent)
 {
     instance = this;
+    instance->controller = parent;
 
     qRegisterMetaType<sensors>();
     qRegisterMetaType<Status>();
@@ -125,12 +127,35 @@ void ModelBLE::newDataReceived(__in BTH_LE_GATT_EVENT_TYPE EventType, __in PVOID
         instance->timer.start();
         // DEBUGGING
 
+        // Store all the data received as is.
         for (int i = 0; i < ValueChangedEventParameters->CharacteristicValueDataSize; i++)
             instance->Capsense->rawData.push_back(ValueChangedEventParameters->CharacteristicValue->Data[i]);
 
         // DEBUGGING
         qDebug() << "Time elapsed = " << instance->timer.elapsed() << endl;
         // DEBUGGING
+
+
+        // If in synchronous mode, display the values received.
+        if ( instance->controller->isSynchronous() ) {
+            BLEsensor sensor[NUM_SENSORS];
+            sensors valuesToPush;
+            const quint8 sensorDataSize = sizeof(quint32);
+
+            // For each sensor...
+            for (int i = 0; i < NUM_SENSORS; i++) {
+                // For each byte...
+                for (int j = 0; j < sensorDataSize; j++)
+                    // Copy the byte into the array that holds the whole DWORD sent by the BLE device.
+                    sensor[i].Data = sensor[i].Data << BYTE | ValueChangedEventParameters->CharacteristicValue->Data[(sensorDataSize * i) + j];
+
+                /* Extract the sensor value from the DWORD. */
+                valuesToPush.sensor[i] = sensor[i].Data >> (2 * BYTE) & 0xFFFF;
+            }
+
+            // Signal to update the progress bars displaying the last values.
+            emit(instance->newCapSenseValuesReceived(valuesToPush));
+        }
     }
 }
 

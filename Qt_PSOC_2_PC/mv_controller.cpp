@@ -5,7 +5,8 @@
 MV_Controller::MV_Controller(MainWindow *parent)
 {
     ModelBLE::deleteInstance();
-    this->model = ModelBLE::getInstance();
+    this->model = ModelBLE::getInstance(this);
+    this->view = parent;
 
     crcInit();
 
@@ -115,7 +116,7 @@ void MV_Controller::validateAndFillValues()
     sensors valuesToPush;
     const quint8 sensorDataSize = sizeof(quint32);
     const quint8 allSensorsDataSize = sensorDataSize * NUM_SENSORS;
-    quint8 numSets;
+    quint32 numSets;
     numSets = model->Capsense->rawData.size() / allSensorsDataSize;
 
     // For each of the set of data sent...
@@ -135,16 +136,23 @@ void MV_Controller::validateAndFillValues()
             if (verifyCRC(sensor[i].Value, sensor[i].CRC))
                 valuesToPush.sensor[i] = sensor[i].Value;
             else
-                valuesToPush.sensor[i] = NULL;
+                valuesToPush.sensor[i] = 1;
         }
 
-        /* Push all the sensor values received into the vector that holds all the sensor values. */
+        // Push all the sensor values received into the vector that holds all the sensor values.
         model->Capsense->values.push_back(valuesToPush);
 
-//        /* Signal to update the progress bars displaying the last values. */
-//        emit(instance->newCapSenseValuesReceived(valuesToPush));
-    }
+        //Calculate the center of mass.
+        double num = 0;
+        double denom = 0;
 
+        for (int sensor = 1; sensor <= NUM_SENSORS; sensor++) {
+            num += valuesToPush.sensor[sensor-1] * sensor;
+            denom += valuesToPush.sensor[sensor-1];
+        }
+
+        model->Capsense->centerMass.push_back(num / denom);
+    }
 }
 
 
@@ -167,12 +175,19 @@ quint16 MV_Controller::getCurrCharValue(int row, int sensor)
 }
 
 
+double MV_Controller::getCurrCharCoM(int row)
+{
+    return model->Capsense->centerMass[row];
+}
+
+
 void MV_Controller::clearCurrCharDataModel()
 {
     model->Capsense->removeRows(0, getNumRowsCurrCharDataModel());
     model->Capsense->rawData.clear();
     model->Capsense->values.clear();
     model->Capsense->keys.clear();
+    model->Capsense->centerMass.clear();
 }
 
 
@@ -308,4 +323,10 @@ bool MV_Controller::isStillAcquiring()
 bool MV_Controller::isReady()
 {
     return model->StatusFlags.Ready;
+}
+
+
+bool MV_Controller::isSynchronous()
+{
+    return view->isSynchronous();
 }

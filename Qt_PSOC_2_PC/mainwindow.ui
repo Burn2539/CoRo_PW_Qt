@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>900</width>
+    <height>675</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -467,7 +467,7 @@
       <item>
        <widget class="QTabWidget" name="DisplayTabs">
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="capsenseArray">
          <attribute name="title">
@@ -497,6 +497,9 @@
             <property name="showDropIndicator" stdset="0">
              <bool>false</bool>
             </property>
+            <property name="dragDropOverwriteMode">
+             <bool>false</bool>
+            </property>
             <property name="alternatingRowColors">
              <bool>true</bool>
             </property>
@@ -522,10 +525,81 @@
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QCustomPlot" name="plot_sensors" native="true"/>
+           <widget class="QScrollArea" name="scrollArea">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOn</enum>
+            </property>
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>663</width>
+               <height>1018</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QCustomPlot" name="plot_sensors" native="true">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>1000</height>
+                 </size>
+                </property>
+                <property name="cursor">
+                 <cursorShape>ArrowCursor</cursorShape>
+                </property>
+                <property name="mouseTracking">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </widget>
           </item>
           <item>
            <widget class="QScrollBar" name="plot_horizontalDrag">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="capsenseCoM">
+         <attribute name="title">
+          <string>Center of mass</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QCustomPlot" name="plot_CoM" native="true">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QScrollBar" name="plotCoM_horizontalDrag">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -544,7 +618,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>900</width>
      <height>20</height>
     </rect>
    </property>
@@ -555,7 +629,14 @@
     <addaction name="actionGATT_Profile"/>
     <addaction name="actionSettings"/>
    </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionCopy"/>
+   </widget>
    <addaction name="menuBluetooth"/>
+   <addaction name="menuEdit"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -574,6 +655,11 @@
   <action name="actionGATT_Profile">
    <property name="text">
     <string>GATT Profile</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy</string>
    </property>
   </action>
  </widget>

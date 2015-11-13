@@ -12,6 +12,7 @@ public:
     QVector<quint8> rawData;
     QVector<double> keys;
     QVector<sensors> values;
+    QVector<double> centerMass;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE ;
     int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;

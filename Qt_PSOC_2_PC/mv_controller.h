@@ -32,9 +32,11 @@ public:
     void buildCurrCharDataModel();
     int getNumRowsCurrCharDataModel();
     quint16 getCurrCharValue(int row, int sensor);
+    double getCurrCharCoM(int row);
     void generateKeys(double totalTime);
     double getCurrCharKey(int index);
     void clearCurrCharDataModel();
+    bool isSynchronous();
 
     //CapSense
     void subscribeToSensorsNotifications(bool notifications, bool indications);
@@ -57,6 +59,7 @@ public:
 
 private:
     ModelBLE *model;
+    MainWindow *view;
     Characteristic *CurrChar = nullptr;
 
 

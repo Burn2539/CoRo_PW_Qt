@@ -14,7 +14,7 @@
 #include <QElapsedTimer>
 #include "qcustomplot.h"
 
-#define NUM_SENSORS 5
+#define NUM_SENSORS 10
 
 
 struct BLEsensor {

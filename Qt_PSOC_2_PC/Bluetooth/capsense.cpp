@@ -11,6 +11,7 @@ CapSense::CapSense()
     rawData.reserve(10000);
     values.reserve(5000);
     keys.reserve(5000);
+    centerMass.reserve(5000);
 }
 
 
@@ -24,6 +25,7 @@ CapSense::~CapSense()
     rawData.clear();
     values.clear();
     keys.clear();
+    centerMass.clear();
 }
 
 
@@ -45,10 +47,10 @@ int CapSense::rowCount(const QModelIndex & /*parent*/) const
 **************************************************************************/
 int CapSense::columnCount(const QModelIndex & /*parent*/) const
 {
-    /***************************************************
-     * Sensor1 * Sensor2 * Sensor3 * Sensor4 *   ...   *
-     ***************************************************/
-    return NUM_SENSORS;
+    /**********************************************************
+     * Sensor1 * Sensor2 * Sensor3 *   ...   * Center of mass *
+     **********************************************************/
+    return NUM_SENSORS + 1;
 }
 
 
@@ -61,7 +63,10 @@ QVariant CapSense::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole)
     {
-        return this->values.at(index.row()).sensor[index.column()];
+        if (index.column() < NUM_SENSORS)
+            return this->values.at(index.row()).sensor[index.column()];
+        else
+            return this->centerMass.at(index.row());
     }
     return QVariant();
 }
@@ -76,8 +81,12 @@ QVariant CapSense::headerData(int section, Qt::Orientation orientation, int role
 {
     if (role == Qt::DisplayRole)
     {
-        if (orientation == Qt::Horizontal)
-            return QString("Sensor %1").arg(section + 1);
+        if (orientation == Qt::Horizontal) {
+            if (section < NUM_SENSORS)
+                return QString("Sensor %1").arg(section + 1);
+            else
+                return QString("Center of mass");
+        }
         else if (orientation == Qt::Vertical)
             //return QString::number(keys[section], 'f', 3);
             return QString("%1").arg(section + 1);
