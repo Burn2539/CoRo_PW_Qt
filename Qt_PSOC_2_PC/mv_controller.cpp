@@ -5,7 +5,14 @@
 MV_Controller::MV_Controller(MainWindow *parent)
 {
     ModelBLE::deleteInstance();
-    this->model = ModelBLE::getInstance(this);
+    try {
+        this->model = ModelBLE::getInstance(this);
+    }
+    catch(int e) {
+        qWarning() << "A bluetooth device needs to be connected." << endl;
+        throw e;
+    }
+
     this->view = parent;
 
     crcInit();

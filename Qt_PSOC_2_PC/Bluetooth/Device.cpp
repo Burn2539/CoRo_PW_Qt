@@ -11,6 +11,9 @@ Device::Device(GUID _guid)
 {
 	this->Guid = _guid;
 	this->Handle = getHandle(Guid);
+
+    if (this->Handle == NULL)
+        throw 99;
 }
 
 

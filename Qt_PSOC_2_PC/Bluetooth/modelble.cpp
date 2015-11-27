@@ -43,7 +43,13 @@ ModelBLE::ModelBLE(MV_Controller *parent)
 
     /* Create the BLE device. */
     CLSIDFromString(TEXT(UUID_DEVICE), &instance->PSOCguid);
-    instance->PSOC = new Device(instance->PSOCguid);
+    try {
+        instance->PSOC = new Device(instance->PSOCguid);
+    }
+    catch(int e) {
+        qCritical() << "No bluetooth device paired to the computer." << endl;
+        throw e;
+    }
 
     /* Retrieve the whole data structure from the BLE device. */
     instance->PSOC->retrieveListServices();

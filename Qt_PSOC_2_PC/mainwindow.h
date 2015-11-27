@@ -3,8 +3,6 @@
 #include "main.h"
 #include "qcustomplot.h"
 #include "mv_controller.h"
-#include "gattprofilewindow.h"
-#include "settingswindow.h"
 
 namespace Ui {
 class MainWindow;
@@ -31,8 +29,6 @@ private slots:
     void downloadDataDone();
     void on_clear_clicked();
     void on_characteristicSelection_currentIndexChanged();
-    void on_actionGATT_Profile_triggered();
-    void on_actionSettings_triggered();
     void on_sendDataSynchronously_clicked();
     void onXRangeChanged(const QCPRange newRange, const QCPRange oldRange);
     void onHorizontalDragChanged(const int newCenter);
@@ -42,8 +38,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    SettingsWindow *settingsWindow;
-    GattProfileWindow *gattProfileWindow;
     MV_Controller *controller;
     double plotXAxis_minRange = 0;
     double plotXAxis_maxRange = 10;

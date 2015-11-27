@@ -11,7 +11,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 TARGET = Qt_PSOC_2_PC
 TEMPLATE = app
 
-
 SOURCES += main.cpp\
         mainwindow.cpp \
     mv_controller.cpp \
@@ -23,8 +22,6 @@ SOURCES += main.cpp\
     Bluetooth/Device.cpp \
     Bluetooth/modelble.cpp \
     Bluetooth/Service.cpp \
-    settingswindow.cpp \
-    gattprofilewindow.cpp \
     Bluetooth/l2cap.cpp
 
 HEADERS  += mainwindow.h \
@@ -38,10 +35,6 @@ HEADERS  += mainwindow.h \
     Bluetooth/modelble.h \
     Bluetooth/Service.h \
     main.h \
-    settingswindow.h \
-    gattprofilewindow.h \
     Bluetooth/l2cap.h
 
-FORMS    += mainwindow.ui \
-    settingswindow.ui \
-    gattprofilewindow.ui
+FORMS    += mainwindow.ui

@@ -1,7 +1,5 @@
 #pragma once
 
-class L2CAP
-{
-public:
-    L2CAP();
-};
+#include "main.h"
+
+void L2CAP_registerServer();

@@ -1,16 +1,18 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "mv_controller.h"
-#include "gattprofilewindow.h"
-#include "settingswindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     /* MODEL */
-    controller = new MV_Controller(this);
-
+    try {
+        controller = new MV_Controller(this);
+    }
+    catch(int e) {
+        throw e;
+    }
 
     /* UI FORM */
     ui->setupUi(this);
@@ -67,11 +69,37 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     /* PROGRESS BARS: Sensors' last values */
+    int max = 0xFFFF;
+    ui->sensor0->setRange(0, max);
     ui->sensor0->setValue(0);
+    ui->value_sensor0->setText(QString::number(0));
+    ui->sensor1->setRange(0, max);
     ui->sensor1->setValue(0);
+    ui->value_sensor1->setText(QString::number(0));
+    ui->sensor2->setRange(0, max);
     ui->sensor2->setValue(0);
+    ui->value_sensor2->setText(QString::number(0));
+    ui->sensor3->setRange(0, max);
     ui->sensor3->setValue(0);
+    ui->value_sensor3->setText(QString::number(0));
+    ui->sensor4->setRange(0, max);
     ui->sensor4->setValue(0);
+    ui->value_sensor4->setText(QString::number(0));
+    ui->sensor5->setRange(0, max);
+    ui->sensor5->setValue(0);
+    ui->value_sensor5->setText(QString::number(0));
+    ui->sensor6->setRange(0, max);
+    ui->sensor6->setValue(0);
+    ui->value_sensor6->setText(QString::number(0));
+    ui->sensor7->setRange(0, max);
+    ui->sensor7->setValue(0);
+    ui->value_sensor7->setText(QString::number(0));
+    ui->sensor8->setRange(0, max);
+    ui->sensor8->setValue(0);
+    ui->value_sensor8->setText(QString::number(0));
+    ui->sensor9->setRange(0, max);
+    ui->sensor9->setValue(0);
+    ui->value_sensor9->setText(QString::number(0));
 
 
     // CHECKBOX: Send data synchronously
@@ -86,6 +114,10 @@ MainWindow::MainWindow(QWidget *parent) :
     /* PLOT: Chart for each sensor */
     ui->plot_sensors->plotLayout()->clear();
     ui->plot_sensors->setAntialiasedElements(QCP::aeAll);
+
+    QPen *pen = new QPen();
+    pen->setColor(Qt::black);
+    pen->setWidth(3);
 
     QVector<QCPAxisRect *> sensor;
     sensor.resize(controller->getNumSensors());
@@ -144,8 +176,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
         /* Graph */
         sensorGraph[i] = ui->plot_sensors->addGraph(sensor[i]->axis(QCPAxis::atBottom), sensor[i]->axis(QCPAxis::atLeft));
-        sensorGraph[i]->setPen(QPen(Qt::black));
-        sensorGraph[i]->pen().setWidth(5);
+        sensorGraph[i]->setPen(*pen);
         sensorGraph[i]->setLineStyle(QCPGraph::lsLine);
     }
 
@@ -169,7 +200,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QCPMarginGroup *marginGroupCoM = new QCPMarginGroup(ui->plot_CoM);
 
     // Y Axis.
-    CoM_AxisRect->axis(QCPAxis::atLeft)->setRangeUpper(NUM_SENSORS);
+    CoM_AxisRect->axis(QCPAxis::atLeft)->setRangeUpper(NUM_SENSORS+0.5);
+    CoM_AxisRect->axis(QCPAxis::atLeft)->setRangeLower(0.5);
     CoM_AxisRect->axis(QCPAxis::atLeft)->setAutoTicks(true);
     CoM_AxisRect->axis(QCPAxis::atLeft)->setAutoTickStep(false);
     CoM_AxisRect->axis(QCPAxis::atLeft)->setTickStep(1);
@@ -207,8 +239,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Graph.
     QCPGraph *CoM_Graph;
     CoM_Graph = ui->plot_CoM->addGraph(CoM_AxisRect->axis(QCPAxis::atBottom), CoM_AxisRect->axis(QCPAxis::atLeft));
-    CoM_Graph->setPen(QPen(Qt::black));
-    CoM_Graph->pen().setWidth(5);
+    CoM_Graph->setPen(*pen);
     CoM_Graph->setLineStyle(QCPGraph::lsLine);
 
     // Horizontal drag slider.
@@ -217,11 +248,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plotCoM_horizontalDrag->setValue(X_Axis->axis(QCPAxis::atBottom)->range().lower + X_Axis->axis(QCPAxis::atBottom)->range().size() / 2);
     connect(ui->plotCoM_horizontalDrag, SIGNAL(sliderMoved(int)), ui->plot_horizontalDrag, SLOT(setValue(int)));
     connect(ui->plotCoM_horizontalDrag, SIGNAL(sliderMoved(int)), this, SLOT(onHorizontalDragChanged(int)));
-
-
-    // OTHER WINDOWS.
-    gattProfileWindow = new GattProfileWindow(this);
-    settingsWindow = new SettingsWindow(this);
 
 
     // Subscribe to notifications.
@@ -240,8 +266,6 @@ MainWindow::~MainWindow()
 
     delete controller;
     delete ui;
-    delete gattProfileWindow;
-    delete settingsWindow;
 }
 
 
@@ -338,9 +362,6 @@ void MainWindow::downloadDataDone()
     for (int row = 0; row < controller->getNumRowsCurrCharDataModel(); row++)
         ui->plot_CoM->graph()->addData(controller->getCurrCharKey(row), controller->getCurrCharCoM(row));
 
-    if (ui->plot_CoM->axisRect()->axis(QCPAxis::atLeft)->range().lower < 0)
-        ui->plot_CoM->axisRect()->axis(QCPAxis::atLeft)->setRangeLower(0);
-
     ui->plot_CoM->replot();
 
     // Draw the controls.
@@ -376,10 +397,25 @@ void MainWindow::on_clear_clicked()
 
     /* Set the progress bars value to 0 */
     ui->sensor0->setValue(0);
+    ui->value_sensor0->setText(QString::number(0));
     ui->sensor1->setValue(0);
+    ui->value_sensor1->setText(QString::number(0));
     ui->sensor2->setValue(0);
+    ui->value_sensor2->setText(QString::number(0));
     ui->sensor3->setValue(0);
+    ui->value_sensor3->setText(QString::number(0));
     ui->sensor4->setValue(0);
+    ui->value_sensor4->setText(QString::number(0));
+    ui->sensor5->setValue(0);
+    ui->value_sensor5->setText(QString::number(0));
+    ui->sensor6->setValue(0);
+    ui->value_sensor6->setText(QString::number(0));
+    ui->sensor7->setValue(0);
+    ui->value_sensor7->setText(QString::number(0));
+    ui->sensor8->setValue(0);
+    ui->value_sensor8->setText(QString::number(0));
+    ui->sensor9->setValue(0);
+    ui->value_sensor9->setText(QString::number(0));
 }
 
 
@@ -395,10 +431,25 @@ void MainWindow::newValuesReceived_updateView(sensors newValues)
     /* PROGRESS BARS: Sensor's last values */
     if ( ui->sendDataSynchronously->isChecked() ) {
         ui->sensor0->setValue(newValues.sensor[0]);
+        ui->value_sensor0->setText(QString::number(newValues.sensor[0]));
         ui->sensor1->setValue(newValues.sensor[1]);
+        ui->value_sensor1->setText(QString::number(newValues.sensor[1]));
         ui->sensor2->setValue(newValues.sensor[2]);
+        ui->value_sensor2->setText(QString::number(newValues.sensor[2]));
         ui->sensor3->setValue(newValues.sensor[3]);
+        ui->value_sensor3->setText(QString::number(newValues.sensor[3]));
         ui->sensor4->setValue(newValues.sensor[4]);
+        ui->value_sensor4->setText(QString::number(newValues.sensor[4]));
+        ui->sensor5->setValue(newValues.sensor[5]);
+        ui->value_sensor5->setText(QString::number(newValues.sensor[5]));
+        ui->sensor6->setValue(newValues.sensor[6]);
+        ui->value_sensor6->setText(QString::number(newValues.sensor[6]));
+        ui->sensor7->setValue(newValues.sensor[7]);
+        ui->value_sensor7->setText(QString::number(newValues.sensor[7]));
+        ui->sensor8->setValue(newValues.sensor[8]);
+        ui->value_sensor8->setText(QString::number(newValues.sensor[8]));
+        ui->sensor9->setValue(newValues.sensor[9]);
+        ui->value_sensor9->setText(QString::number(newValues.sensor[9]));
     }
 }
 
@@ -594,18 +645,6 @@ void MainWindow::setLCD(bool finalDisplay)
     // Set label text.
     lcdTimer->setText("Acquisition: " + timeValueAcquisition.toString(QString("mm:ss.zzz")) +
                       "\t Sending: " + timeValueSending.toString(QString("mm:ss.zzz")));
-}
-
-
-void MainWindow::on_actionSettings_triggered()
-{
-    settingsWindow->show();
-}
-
-
-void MainWindow::on_actionGATT_Profile_triggered()
-{
-    gattProfileWindow->show();
 }
 
 
