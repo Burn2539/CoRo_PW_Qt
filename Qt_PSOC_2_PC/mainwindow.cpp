@@ -1,12 +1,47 @@
+/****************************************************************************
+*
+* Project Name		: Qt_PSOC_2_PC
+*
+* File Name			: mainwindow.cpp
+* File Version      : 2.3.1
+* Qt Version        : Qt 5.5.0 MSVC 2013 64bit
+* Compiler          : Microsoft Visual C++ Compiler 12.0 (amd64)
+*
+* Owner             : A. BERNIER
+*
+*****************************************************************************/
+
+
+/*****************************************************************************
+* Included headers
+*****************************************************************************/
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "mv_controller.h"
+#include "qcustomplot.h"
 
+
+/*****************************************************************************
+* Function Name: MainWindow()
+******************************************************************************
+* Summary:
+*   Create and initialize every items used by the main window.
+*
+* Parameters:
+*   Parent.
+*
+* Return:
+*   Address of the new MainWindow.
+*
+* Note:
+*   Using a Model-Controller-View approach.
+*
+*****************************************************************************/
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    /* MODEL */
+    // Create the controller
     try {
         controller = new MV_Controller(this);
     }
@@ -14,15 +49,15 @@ MainWindow::MainWindow(QWidget *parent) :
         throw e;
     }
 
-    /* UI FORM */
+    // .ui form
     ui->setupUi(this);
 
 
-    /* MainWindow */
+    // Window title
     this->setWindowTitle("CapSense data acquisition");
 
 
-    /* COMBOBOX: Characteristic selection */
+    // COMBOBOX: Characteristic selection
     for (int i = 0; i < controller->getNumServices(); i++) {
         for (int j = 0; j < controller->getNumCharacteristics(i); j++) {
             if ( !controller->isCharacteristicNameEmpty(i, j) )
@@ -34,21 +69,21 @@ MainWindow::MainWindow(QWidget *parent) :
         controller->setCurrChar( (Characteristic *)ui->characteristicSelection->currentData().value<void *>() );
 
 
-    /* PUSH BUTTON: Start acquisition */
+    // PUSH BUTTON: Start acquisition
     ui->startAcquisition->setEnabled(false);
 
-    /* PUSH BUTTON: Stop acquisition */
+    // PUSH BUTTON: Stop acquisition
     ui->stopAcquisition->setEnabled(false);
 
-    /* PUSH BUTTON: Download data */
+    // PUSH BUTTON: Download data
     ui->downloadData->setEnabled(false);
 
-    /* PUSH BUTTON: Clear */
+    // PUSH BUTTON: Clear
     if (ui->characteristicSelection->count() > 0)
         ui->clear->setEnabled(true);
 
 
-    /* LCD NUMBER: Elapsed time (acquisition) */
+    // LCD NUMBER: Elapsed time (acquisition)
     lcdTimer = new QLabel;
     timerAcquisition = new QTimer();
     timerAcquisition->setInterval(1000);
@@ -61,14 +96,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addWidget(lcdTimer);
 
 
-    /* LABELS: Status */
+    // LABELS: Status
     ui->Ind_Ready_Acq->setVisible(false);
     ui->Ind_Acq->setVisible(false);
     ui->Ind_Ready_Send->setVisible(false);
     ui->Ind_Send->setVisible(false);
 
 
-    /* PROGRESS BARS: Sensors' last values */
+    // PROGRESS BARS: Sensors' last values
     int max = 0xFFFF;
     ui->sensor0->setRange(0, max);
     ui->sensor0->setValue(0);
@@ -107,11 +142,11 @@ MainWindow::MainWindow(QWidget *parent) :
     on_sendDataSynchronously_clicked();
 
 
-    /* TABLEVIEW: All sensors' values */
+    // TABLEVIEW: All sensors' values
     ui->sensorsTable->setModel( controller->getCurrCharDataModelAddress() );
 
 
-    /* PLOT: Chart for each sensor */
+    // PLOT: Chart for each sensor
     ui->plot_sensors->plotLayout()->clear();
     ui->plot_sensors->setAntialiasedElements(QCP::aeAll);
 
@@ -125,7 +160,7 @@ MainWindow::MainWindow(QWidget *parent) :
     sensorGraph.resize(controller->getNumSensors());
     QCPMarginGroup *marginGroup = new QCPMarginGroup(ui->plot_sensors);
 
-    /* Global X Axis */
+    // Global X Axis
     QCPAxisRect *X_Axis = new QCPAxisRect(ui->plot_sensors);
     X_Axis->axis(QCPAxis::atBottom)->setTickLabelType(QCPAxis::ltDateTime);
     X_Axis->axis(QCPAxis::atBottom)->setDateTimeFormat("mm:ss.zzz");
@@ -137,11 +172,11 @@ MainWindow::MainWindow(QWidget *parent) :
     X_Axis->axis(QCPAxis::atBottom)->grid()->setVisible(false);
     X_Axis->axis(QCPAxis::atLeft)->setVisible(false);
 
-    /* Sensors' plot */
+    // Sensors' plot
     for (int i = 0; i < controller->getNumSensors(); i++) {
         sensor[i] = new QCPAxisRect(ui->plot_sensors);
 
-        /* Y Axis */
+        // Y Axis
         sensor[i]->axis(QCPAxis::atLeft)->setRangeUpper(0xFFFF);
         sensor[i]->axis(QCPAxis::atLeft)->setAutoTicks(true);
         sensor[i]->axis(QCPAxis::atLeft)->setAutoTickStep(true);
@@ -150,7 +185,7 @@ MainWindow::MainWindow(QWidget *parent) :
         sensor[i]->axis(QCPAxis::atLeft)->setTickLabels(true);
         sensor[i]->axis(QCPAxis::atLeft)->setLabel( "Sensor " + QString::number(i+1) );
 
-        /* X Axis */
+        // X Axis
         sensor[i]->axis(QCPAxis::atBottom)->setTickLabelType(QCPAxis::ltDateTime);
         sensor[i]->axis(QCPAxis::atBottom)->setDateTimeFormat("mm:ss.zzz");
         sensor[i]->axis(QCPAxis::atBottom)->setAutoTicks(true);
@@ -159,47 +194,47 @@ MainWindow::MainWindow(QWidget *parent) :
         sensor[i]->axis(QCPAxis::atBottom)->setAutoSubTicks(true);
         sensor[i]->axis(QCPAxis::atBottom)->setTickLabels(true);
 
-        /* Full Axes Box */
+        // Full Axes Box
         sensor[i]->setupFullAxesBox();
         connect(sensor[i]->axis(QCPAxis::atBottom), SIGNAL(rangeChanged(QCPRange)), sensor[i]->axis(QCPAxis::atTop), SLOT(setRange(QCPRange)));
         connect(sensor[i]->axis(QCPAxis::atLeft), SIGNAL(rangeChanged(QCPRange)), sensor[i]->axis(QCPAxis::atRight), SLOT(setRange(QCPRange)));
 
-        /* Horizontal drag and zoom */
+        // Horizontal drag and zoom
         sensor[i]->setRangeDrag(Qt::Horizontal);
         sensor[i]->setRangeZoom(Qt::Horizontal);
         ui->plot_sensors->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
         connect(sensor[i]->axis(QCPAxis::atBottom), SIGNAL(rangeChanged(QCPRange)), X_Axis->axis(QCPAxis::atBottom), SLOT(setRange(QCPRange)));
 
-        /* Add plot to widget */
+        // Add plot to widget
         ui->plot_sensors->plotLayout()->addElement(i, 0, sensor[i]);
         sensor[i]->setMarginGroup(QCP::msLeft, marginGroup);
 
-        /* Graph */
+        // Graph
         sensorGraph[i] = ui->plot_sensors->addGraph(sensor[i]->axis(QCPAxis::atBottom), sensor[i]->axis(QCPAxis::atLeft));
         sensorGraph[i]->setPen(*pen);
         sensorGraph[i]->setLineStyle(QCPGraph::lsLine);
     }
 
-    /* Use the Global X Axis to control the range of all the plots (for the horizontal drag event) */
+    // Use the Global X Axis to control the range of all the plots (for the horizontal drag event)
     for (int i = 0; i < controller->getNumSensors(); i++)
         connect(X_Axis->axis(QCPAxis::atBottom), SIGNAL(rangeChanged(QCPRange)), sensor[i]->axis(QCPAxis::atBottom), SLOT(setRange(QCPRange)));
     connect(X_Axis->axis(QCPAxis::atBottom), SIGNAL(rangeChanged(QCPRange, QCPRange)), this, SLOT(onXRangeChanged(QCPRange, QCPRange)));
 
-    /* Horizontal drag slider */
+    // Horizontal drag slider
     ui->plot_horizontalDrag->setRange(plotXAxis_minRange + X_Axis->axis(QCPAxis::atBottom)->range().size() / 2,
                                       plotXAxis_maxRange - X_Axis->axis(QCPAxis::atBottom)->range().size() / 2);
     ui->plot_horizontalDrag->setValue(X_Axis->axis(QCPAxis::atBottom)->range().lower + X_Axis->axis(QCPAxis::atBottom)->range().size() / 2);
     connect(ui->plot_horizontalDrag, SIGNAL(sliderMoved(int)), this, SLOT(onHorizontalDragChanged(int)));
 
 
-    // PLOT: Center of mass.
+    // PLOT: Center of mass
     ui->plot_CoM->plotLayout()->clear();
     ui->plot_CoM->setAntialiasedElements(QCP::aeAll);
 
     QCPAxisRect *CoM_AxisRect = new QCPAxisRect(ui->plot_CoM);
     QCPMarginGroup *marginGroupCoM = new QCPMarginGroup(ui->plot_CoM);
 
-    // Y Axis.
+    // Y Axis
     CoM_AxisRect->axis(QCPAxis::atLeft)->setRangeUpper(NUM_SENSORS+0.5);
     CoM_AxisRect->axis(QCPAxis::atLeft)->setRangeLower(0.5);
     CoM_AxisRect->axis(QCPAxis::atLeft)->setAutoTicks(true);
@@ -210,7 +245,7 @@ MainWindow::MainWindow(QWidget *parent) :
     CoM_AxisRect->axis(QCPAxis::atLeft)->setTickLabels(true);
     CoM_AxisRect->axis(QCPAxis::atLeft)->setLabel("Center of mass");
 
-    // X Axis.
+    // X Axis
     CoM_AxisRect->axis(QCPAxis::atBottom)->setTickLabelType(QCPAxis::ltDateTime);
     CoM_AxisRect->axis(QCPAxis::atBottom)->setDateTimeFormat("mm:ss.zzz");
     CoM_AxisRect->axis(QCPAxis::atBottom)->setAutoTicks(true);
@@ -220,29 +255,29 @@ MainWindow::MainWindow(QWidget *parent) :
     CoM_AxisRect->axis(QCPAxis::atBottom)->setTickLabels(true);
     CoM_AxisRect->axis(QCPAxis::atBottom)->setLabel("Time");
 
-    // Full Axes Box.
+    // Full Axes Box
     CoM_AxisRect->setupFullAxesBox();
     connect(CoM_AxisRect->axis(QCPAxis::atBottom), SIGNAL(rangeChanged(QCPRange)), CoM_AxisRect->axis(QCPAxis::atTop), SLOT(setRange(QCPRange)));
     connect(CoM_AxisRect->axis(QCPAxis::atLeft), SIGNAL(rangeChanged(QCPRange)), CoM_AxisRect->axis(QCPAxis::atRight), SLOT(setRange(QCPRange)));
 
-    // Horizontal drag and zoom.
+    // Horizontal drag and zoom
     CoM_AxisRect->setRangeDrag(Qt::Horizontal);
     CoM_AxisRect->setRangeZoom(Qt::Horizontal);
     ui->plot_CoM->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     connect(CoM_AxisRect->axis(QCPAxis::atBottom), SIGNAL(rangeChanged(QCPRange)), X_Axis->axis(QCPAxis::atBottom), SLOT(setRange(QCPRange)));
     connect(X_Axis->axis(QCPAxis::atBottom), SIGNAL(rangeChanged(QCPRange)), CoM_AxisRect->axis(QCPAxis::atBottom), SLOT(setRange(QCPRange)));
 
-    // Add plot to widget.
+    // Add plot to widget
     ui->plot_CoM->plotLayout()->addElement(0, 0, CoM_AxisRect);
     CoM_AxisRect->setMarginGroup(QCP::msLeft, marginGroupCoM);
 
-    // Graph.
+    // Graph
     QCPGraph *CoM_Graph;
     CoM_Graph = ui->plot_CoM->addGraph(CoM_AxisRect->axis(QCPAxis::atBottom), CoM_AxisRect->axis(QCPAxis::atLeft));
     CoM_Graph->setPen(*pen);
     CoM_Graph->setLineStyle(QCPGraph::lsLine);
 
-    // Horizontal drag slider.
+    // Horizontal drag slider
     ui->plotCoM_horizontalDrag->setRange(plotXAxis_minRange + X_Axis->axis(QCPAxis::atBottom)->range().size() / 2,
                                       plotXAxis_maxRange - X_Axis->axis(QCPAxis::atBottom)->range().size() / 2);
     ui->plotCoM_horizontalDrag->setValue(X_Axis->axis(QCPAxis::atBottom)->range().lower + X_Axis->axis(QCPAxis::atBottom)->range().size() / 2);
@@ -250,11 +285,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->plotCoM_horizontalDrag, SIGNAL(sliderMoved(int)), this, SLOT(onHorizontalDragChanged(int)));
 
 
-    // Subscribe to notifications.
+    // Subscribe to notifications
     controller->subscribeToSensorsNotifications(true, false);
     controller->subscribeToStatusNotifications(false, true);
 
-    // First read of the status flags.
+    // First read of the status flags
     controller->readStatusFlags();
 }
 

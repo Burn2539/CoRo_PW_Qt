@@ -1,5 +1,9 @@
 #pragma once
-#include "Bluetooth\modelble.h"
+
+/*****************************************************************************
+* Included headers
+*****************************************************************************/
+#include "modelBLE.h"
 
 class CapSense : public QAbstractTableModel
 {

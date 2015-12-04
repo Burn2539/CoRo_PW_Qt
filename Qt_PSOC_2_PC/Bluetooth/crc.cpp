@@ -1,17 +1,31 @@
-/*************************************************************************
+/****************************************************************************
+*
+* Project Name		: Qt_PSOC_2_PC
+*
+* File Name			: crc.cpp
+* File Version      : 2.3.1
+* Qt Version        : Qt 5.5.0 MSVC 2013 64bit
+* Compiler          : Microsoft Visual C++ Compiler 12.0 (amd64)
+*
+* Owner             : A. BERNIER
+*
+*****************************************************************************
 * Source:	Programming Embedded Systems in C and C++
 *			By Michael Barr, p.76
-**************************************************************************/
+*****************************************************************************/
 
+/*****************************************************************************
+* Included headers
+*****************************************************************************/
 #include "crc.h"
 
-/*
-* An array containing the pre-computed intermediate result for each
-* possible byte of input. This is used to speed up the computation.
-*/
+
+// An array containing the pre-computed intermediate result for each
+// possible byte of input. This is used to speed up the computation.
 width crcTable[256];
 
-/*************************************************************************
+
+/*****************************************************************************
 *
 * Function:		crcInit()
 *
@@ -24,24 +38,23 @@ width crcTable[256];
 *
 * Returns:		None defined.
 *
-**************************************************************************/
-
+*****************************************************************************/
 void crcInit(void)
 {
 	width	remainder;
 	width	dividend;
 	int		bit;
 
-	/* Perform binary long division, a bit at a time. */
+    // Perform binary long division, a bit at a time.
 	for (dividend = 0; dividend < 256; dividend++)
 	{
-		/* Initialize the remainder */
+        // Initialize the remainder
 		remainder = dividend << (WIDTH - 8);
 
-		/*Shift and XOR with the polynomial.*/
+        // Shift and XOR with the polynomial
 		for (bit = 0; bit < 8; bit++)
 		{
-			/* Try to divide the current data bit. */
+            // Try to divide the current data bit.
 			if (remainder & TOPBIT)
 			{
 				remainder = (remainder << 1) ^ POLYNOMIAL;
@@ -52,14 +65,14 @@ void crcInit(void)
 			}
 		}
 
-		/* Save the result in the table. */
+        // Save the result in the table.
 		crcTable[dividend] = remainder;
 	}
 
-} /* crcInit() */
+} // crcInit()
 
 
-/*************************************************************************
+/*****************************************************************************
 *
 * Function:		crcCompute()
 *
@@ -73,28 +86,27 @@ void crcInit(void)
 *
 * Returns:		The CRC of the data.
 *
-**************************************************************************/
-
+*****************************************************************************/
 width crcCompute(unsigned char * message, unsigned int nBytes)
 {
 	unsigned int	offset;
 	unsigned char	byte;
 	width			remainder = INTIAL_REMAINDER;
 
-	/* Divide the message by the polynomial, a byte at a time. */
+    // Divide the message by the polynomial, a byte at a time.
 	for (offset = 0; offset < nBytes; offset++)
 	{
 		byte = (remainder >> (WIDTH - 8)) ^ message[offset];
 		remainder = crcTable[byte] ^ (remainder << 8);
 	}
 
-	/* The final remainder is the CRC result. */
+    // The final remainder is the CRC result.
 	return (remainder ^ FINAL_XOR_VALUE);
 
-} /* crcCompute() */
+} // crcCompute()
 
 
-/*************************************************************************
+/*****************************************************************************
 *
 * Function:		encodeCRC()
 *
@@ -107,8 +119,7 @@ width crcCompute(unsigned char * message, unsigned int nBytes)
 * Returns:		32 bits message. Message (16 bits) followed by
 *				the CRC (16 bits).
 *
-**************************************************************************/
-
+*****************************************************************************/
 quint32 encodeCRC(quint16 value)
 {
 	const int		SizeOfMessage = sizeof(value);
@@ -117,24 +128,24 @@ quint32 encodeCRC(quint16 value)
     quint32         message_with_crc;
 	int				i;
 
-	/* Convert the uint16 into a array of unsigned chars. */
+    // Convert the uint16 into a array of unsigned chars.
 	for (i = 0; i < SizeOfMessage; i++)
 	{
 		message[SizeOfMessage - 1 - i] = (value >> (i * 8) & 0xFF);
 	}
 
-	/* Calculate the CRC. */
+    // Calculate the CRC.
 	crc = crcCompute(message, SizeOfMessage);
 
-	/* Concatenate the original message with the CRC. */
+    // Concatenate the original message with the CRC.
 	message_with_crc = value << 8 * SizeOfMessage | crc;
 
 	return message_with_crc;
 
-} /* encodeCRC() */
+} // encodeCRC()
 
 
-/*************************************************************************
+/*****************************************************************************
 *
 * Function:		verifyCRC()
 *
@@ -148,8 +159,7 @@ quint32 encodeCRC(quint16 value)
 * Returns:		FALSE if checkSUM is bad.
 *				TRUE if checkSUM is good.
 *
-**************************************************************************/
-
+*****************************************************************************/
 bool verifyCRC(quint16 value, quint16 good_crc)
 {
 	const int		SizeOfMessage = sizeof(value);
@@ -157,16 +167,16 @@ bool verifyCRC(quint16 value, quint16 good_crc)
 	width			crc;
 	int				i;
 
-	/* Convert the uint16 into a array of unsigned chars. */
+    // Convert the uint16 into a array of unsigned chars.
 	for (i = 0; i < SizeOfMessage; i++)
 	{
 		message[SizeOfMessage - 1 - i] = (value >> (i * 8) & 0xFF);
 	}
 
-	/* Calculate the CRC. */
+    // Calculate the CRC.
 	crc = crcCompute(message, SizeOfMessage);
 
-	/* Validate the CRC received with the CRC calulated. */
+    // Validate the CRC received with the CRC calulated.
 	return (crc == good_crc);
 
-} /* verifyCRC() */
+} // verifyCRC()

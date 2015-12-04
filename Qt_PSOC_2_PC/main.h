@@ -1,7 +1,9 @@
 #pragma warning(disable:4068)
 #pragma once
 
-/* General librairies. */
+/*****************************************************************************
+* Included headers
+*****************************************************************************/
 #include <QThread>
 #include <QApplication>
 #include <QtGlobal>

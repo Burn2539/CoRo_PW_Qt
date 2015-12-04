@@ -1,8 +1,10 @@
 #pragma once
 
+/*****************************************************************************
+* Included headers
+*****************************************************************************/
 #include "main.h"
 
-// Librairies needed to use BLE on Windows.
 #include <SDKDDKVer.h>
 #include <windows.h>
 #include <setupapi.h>
@@ -15,7 +17,6 @@
 #pragma comment(lib, "BluetoothApis.lib")
 #pragma comment(lib, "Ole32.lib")
 
-// My librairies.
 #include "Bluetooth/crc.h"
 #include "Bluetooth/Descriptor.h"
 #include "Bluetooth/capsense.h"

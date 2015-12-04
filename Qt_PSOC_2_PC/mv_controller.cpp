@@ -1,6 +1,10 @@
+/*****************************************************************************
+* Included headers
+*****************************************************************************/
 #include "mv_controller.h"
 #include "mainwindow.h"
 #include "Bluetooth/modelble.h"
+
 
 MV_Controller::MV_Controller(MainWindow *parent)
 {

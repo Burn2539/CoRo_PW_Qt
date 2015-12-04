@@ -21,8 +21,7 @@ SOURCES += main.cpp\
     Bluetooth/Descriptor.cpp \
     Bluetooth/Device.cpp \
     Bluetooth/modelble.cpp \
-    Bluetooth/Service.cpp \
-    Bluetooth/l2cap.cpp
+    Bluetooth/Service.cpp
 
 HEADERS  += mainwindow.h \
     mv_controller.h \
@@ -34,7 +33,9 @@ HEADERS  += mainwindow.h \
     Bluetooth/Device.h \
     Bluetooth/modelble.h \
     Bluetooth/Service.h \
-    main.h \
-    Bluetooth/l2cap.h
+    main.h
 
 FORMS    += mainwindow.ui
+
+RESOURCES += \
+    images.qrc

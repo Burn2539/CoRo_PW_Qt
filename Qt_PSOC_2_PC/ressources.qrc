@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/ressources">
+        <file>ressources/black_right_pointing_triangle_256x256.png</file>
+    </qresource>
+</RCC>

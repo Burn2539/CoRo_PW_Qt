@@ -206,7 +206,7 @@
                   <string/>
                  </property>
                  <property name="pixmap">
-                  <pixmap>../Images/black_right_pointing_triangle_256x256.png</pixmap>
+                  <pixmap resource="images.qrc">:/images/black_right_pointing_triangle_256x256.png</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -265,7 +265,7 @@
                   <string/>
                  </property>
                  <property name="pixmap">
-                  <pixmap>../Images/black_right_pointing_triangle_256x256.png</pixmap>
+                  <pixmap resource="images.qrc">:/images/black_right_pointing_triangle_256x256.png</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -321,7 +321,7 @@
                   <string/>
                  </property>
                  <property name="pixmap">
-                  <pixmap>../Images/black_right_pointing_triangle_256x256.png</pixmap>
+                  <pixmap resource="images.qrc">:/images/black_right_pointing_triangle_256x256.png</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -377,7 +377,7 @@
                   <string/>
                  </property>
                  <property name="pixmap">
-                  <pixmap>../Images/black_right_pointing_triangle_256x256.png</pixmap>
+                  <pixmap resource="images.qrc">:/images/black_right_pointing_triangle_256x256.png</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -851,17 +851,17 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
+             <item row="2" column="0" alignment="Qt::AlignHCenter">
               <widget class="QLineEdit" name="value_sensor0">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>62</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -885,17 +885,17 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="2">
+             <item row="2" column="2" alignment="Qt::AlignHCenter">
               <widget class="QLineEdit" name="value_sensor1">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>62</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -919,17 +919,17 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="3">
+             <item row="2" column="3" alignment="Qt::AlignHCenter">
               <widget class="QLineEdit" name="value_sensor2">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>62</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -953,17 +953,17 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="4">
+             <item row="2" column="4" alignment="Qt::AlignHCenter">
               <widget class="QLineEdit" name="value_sensor3">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>62</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -987,17 +987,17 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="5">
+             <item row="2" column="5" alignment="Qt::AlignHCenter">
               <widget class="QLineEdit" name="value_sensor4">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>62</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -1021,17 +1021,17 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="6">
+             <item row="2" column="6" alignment="Qt::AlignHCenter">
               <widget class="QLineEdit" name="value_sensor5">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>62</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -1055,17 +1055,17 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="7">
+             <item row="2" column="7" alignment="Qt::AlignHCenter">
               <widget class="QLineEdit" name="value_sensor6">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>62</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -1089,17 +1089,17 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="8">
+             <item row="2" column="8" alignment="Qt::AlignHCenter">
               <widget class="QLineEdit" name="value_sensor7">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>62</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -1123,17 +1123,17 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="9">
+             <item row="2" column="9" alignment="Qt::AlignHCenter">
               <widget class="QLineEdit" name="value_sensor8">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>62</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -1157,17 +1157,17 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="10">
+             <item row="2" column="10" alignment="Qt::AlignHCenter">
               <widget class="QLineEdit" name="value_sensor9">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>62</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -1823,6 +1823,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
  <connections/>
 </ui>

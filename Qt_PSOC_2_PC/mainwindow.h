@@ -1,7 +1,9 @@
 #pragma once
 
+/*****************************************************************************
+* Included headers
+*****************************************************************************/
 #include "main.h"
-#include "qcustomplot.h"
 #include "mv_controller.h"
 
 namespace Ui {
